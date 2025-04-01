@@ -1,5 +1,6 @@
-from backend.database.db_base import get_db_connection
 from mysql.connector import Error
+from .db_base import get_db_connection
+
 
 def get_teams():
     """get teams from database
