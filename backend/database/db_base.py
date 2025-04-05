@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
-from flask import current_app as app
+from dotenv import load_dotenv
+import os
 
 def get_db_connection():
     """get connection to MySQL database in AWS
@@ -9,11 +10,14 @@ def get_db_connection():
        mysql.connector obj
     """
     try:
+        
+        # Load environment variables from .env file
+        load_dotenv()
         connection = mysql.connector.connect(
-            host= app.config["DB_ENDPOINT"],
-            user=app.config["DB_USER"],
-            password= app.config["DB_PASSWORD"],
-            database= app.config["DB_NAME"]
+            host= os.getenv("DB_ENDPOINT"),
+            user= os.getenv("DB_USER"),
+            password= os.getenv("DB_PASSWORD"),
+            database= os.getenv("DB_NAME"),
         )
         if connection.is_connected():
             return connection

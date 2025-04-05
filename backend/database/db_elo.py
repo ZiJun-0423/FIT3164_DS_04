@@ -1,7 +1,6 @@
 from mysql.connector import Error
 from .db_base import get_db_connection
 
-
 def get_elo_ratings():
     pass
 
