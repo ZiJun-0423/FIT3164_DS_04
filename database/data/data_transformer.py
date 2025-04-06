@@ -28,20 +28,22 @@ def clean_round(rounds):
     
     return rounds  # If it's already numeric or NaN, return as is
 
-    
-
-df_git = pd.read_csv("backend/data/clean_data_git/git_data_merged.csv")
+# Read the CSV files
+df_git = pd.read_csv("aws_database/data/clean_data_git/git_data_merged.csv")
 df_kaggle = pd.read_csv("backend/data/clean_data_kaggle/cleaned_kaggle.csv")
 
-df_git['round_num'] = df_git['round_num'].apply(clean_round)
-df_kaggle['round'] = df_kaggle['round'].apply(clean_round)
+#standardize round format
+df_git['round_num'] = df_git['round_num'].astype(str).apply(clean_round)
+df_kaggle['round'] = df_kaggle['round'].astype(str).apply(clean_round)
 
+#standardize team names
 df_git['team_1_team_name'] = df_git['team_1_team_name'].astype(str).apply(clean_team_name)
 df_git['team_2_team_name'] = df_git['team_2_team_name'].astype(str).apply(clean_team_name)
 df_kaggle['team1'] = df_kaggle['team1'].apply(clean_team_name)
 df_kaggle['team2'] = df_kaggle['team2'].apply(clean_team_name)
 
-
+#generating match_id
+# Match ID generation based on year, round, and sorted team names
 df_kaggle['match_id'] = df_kaggle.apply(lambda row: (row['year'], row['round'], tuple(sorted([row['team1'], row['team2']]))), axis=1)
 df_git['match_id'] = df_git.apply(lambda row: (row['year'], row['round_num'], tuple(sorted([row['team_1_team_name'], row['team_2_team_name']]))), axis=1)
 
@@ -50,7 +52,7 @@ df_merged = pd.merge(df_git, df_kaggle, how= 'left')
 # df_merged = df_merged.drop(columns=['match_id', 'Unnamed: 0', 'team1', 'round', 'team2', 'goals_team1','goals_team2','behinds_team1',
 # 'behinds_team2','score_team1','score_team2'])
 
-
+# Rename columns to match the desired format
 df_merged = df_merged.rename(columns={
     'round_num': 'round',
     'team_1_team_name': 'team1',
@@ -72,8 +74,10 @@ df_merged = df_merged.rename(columns={
     'team_2_final_goals': 'team2_final_goals',
     'team_2_final_behinds': 'team2_final_behinds'
 })
+
+#generating team scores
 df_merged['team1_score'] = 6 * df_merged['team1_final_goals'] + df_merged['team1_final_behinds']
 df_merged['team2_score'] = 6 * df_merged['team2_final_goals'] + df_merged['team2_final_behinds']
-df_merged[df_merged['team1_score'].isna()].to_csv("aa.csv")
+
 df_merged.to_csv("backend/data/merged_data.csv")
 print("data cleaned and merged!")
