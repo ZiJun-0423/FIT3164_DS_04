@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premier League - Current Season</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        /* Header & Navbar */
+        header {
+            background-color: #0073e6;
+            padding: 10px 0;
+            color: white;
+        }
+
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 10px 20px;
+            background-color: #005bb5;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            background-color: #004494;
+            transform: scale(1.05); /* Slightly enlarges the button on hover */
+        }
+
+        /* Main Content */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+        }
+
+        .stats, .leaderboard {
+            width: 45%;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .stats ul li {
+            margin-bottom: 10px;
+        }
+
+        /* Leaderboard Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #0073e6;
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #0073e6;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Leaderboard</a></li>
+                <li><a href="#">Stats</a></li>
+                <li><a href="#">Teams</a></li>
+                <li><a href="#">News</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Stats Section -->
+            <div class="stats">
+                <h2>Current Stats</h2>
+                <ul>
+                    <li>Total Matches Played: 380</li>
+                    <li>Goals Scored: 1024</li>
+                    <li>Top Scorer: Harry Kane (30 Goals)</li>
+                    <li>Most Assists: Kevin De Bruyne (18 Assists)</li>
+                </ul>
+            </div>
+
+            <!-- Leaderboard Section -->
+            <div class="leaderboard">
+                <h2>Premier League Leaderboard</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Team</th>
+                            <th>Played</th>
+                            <th>Won</th>
+                            <th>Drawn</th>
+                            <th>Lost</th>
+                            <th>Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Manchester City</td>
+                            <td>32</td>
+                            <td>25</td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>80</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Arsenal</td>
+                            <td>32</td>
+                            <td>22</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>71</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Manchester United</td>
+                            <td>32</td>
+                            <td>19</td>
+                            <td>8</td>
+                            <td>5</td>
+                            <td>65</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Liverpool</td>
+                            <td>32</td>
+                            <td>19</td>
+                            <td>6</td>
+                            <td>7</td>
+                            <td>63</td>
+                        </tr>
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Premier League</p>
+    </footer>
+</body>
+</html>

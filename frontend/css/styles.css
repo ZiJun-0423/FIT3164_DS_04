@@ -20,6 +20,30 @@ body {
   z-index: 1000;
 }
 
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+}
+
+li {
+  float:left;
+}
+
+li a{
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover{
+  background-color: #111;
+}
+
 .afl-logo {
   height: 40px;
   width: auto;
@@ -34,14 +58,32 @@ body {
 }
 
 .team-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
   border: none;
-  background-color: #0073e6;
+  background-color: var(--primary-color); /* fallback color */
   color: white;
   border-radius: 5px;
+  text-align: center;
+  height: 80px; /* Adjust height */
+  background-size: cover; /* Ensures the background image covers the entire button */
+  background-position: center; /* Centers the logo */
 }
+
+.team-button span {
+  position: absolute;
+  z-index: 2; /* Ensures the text is above the logo */
+  color: white; /* Text color */
+  font-size: 18px;
+  font-weight: bold;
+}
+
 
 .team-button:hover {
   background-color: #005bb5;
