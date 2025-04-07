@@ -1,8 +1,9 @@
+/* General Styling */
 .home-container {
-  background-color: #121212;
+  background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
   color: #fff;
   min-height: 100vh;
-  font-family: 'Poppins'
+  font-family: 'Poppins', sans-serif;
 }
 
 .hero-section {
@@ -13,6 +14,7 @@
 .hero-title {
   font-size: 2.5rem;
   font-weight: bold;
+  animation: fadeIn 2s ease-in-out;
 }
 
 .hero-subtitle {
@@ -20,24 +22,20 @@
   margin: 1rem 0;
 }
 
-.button-group {
-  margin-top: 1.5rem;
+/* Hero Title Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-.main-button {
-  margin: 0 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: #00bfa6;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
+/* Card Styling */
 .card-container {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   padding: 2rem;
   background-color: #1e1e1e;
   flex-wrap: wrap;
@@ -46,33 +44,32 @@
 
 .card-box {
   background: #2c2c2c;
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 8px;
-  width: 33%;
+  width: 45%;
   text-align: center;
   color: #fff;
-  min-width: 300px;
+  min-width: 280px;
+  box-shadow: 0 0 8px rgba(0, 191, 166, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.match-table {
-  width: 100%;
-  color: #fff;
-  border-collapse: collapse;
-  margin-top: 1rem;
+.card-box:hover {
+  box-shadow: 0 4px 10px rgba(0, 191, 166, 0.5);
+  transform: translateY(-5px);
 }
 
-.match-table th,
-.match-table td {
-  padding: 0.5rem;
-  text-align: center;
-  border-bottom: 1px solid #333;
+.match-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.team-cell {
+.team {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  justify-content: left;
 }
 
 .mini-logo {
@@ -81,46 +78,44 @@
   border-radius: 5px;
 }
 
-/* LIVE dot effect */
-.live-dot {
-  color: red;
-  font-size: 1.2rem;
-  margin-left: 0.4rem;
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-}
-.card-box {
-  background: #2c2c2c;
-  padding: 1.5rem;
-  border-radius: 8px;
-  width: 25%;
-  text-align: center;
-  color: #fff;
-  min-width: 280px;
-  box-shadow: 0 0 8px rgba(0, 191, 166, 0.2);
+.vs-text {
+  font-weight: bold;
 }
 
-/* Hover effect on rows */
-.match-table tr:hover {
+h4.countdown-timer {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  color: #ffcc00;
+}
+
+/* Table Styling */
+.table-container {
+  width: 100%;
+  border-collapse: separate;
+  margin-top: 2rem;
+}
+
+.table-container th {
+  padding: 12px;
+  text-align: left;
+  color: #ffffff;
+  background-color: #1e1e1e;
+}
+
+.table-container td {
+  padding: 12px;
+  text-align: left;
+  color: #dddddd;
+  border-bottom: 1px solid #333;
+}
+
+.table-container tr:hover {
   background-color: #333;
   transition: background 0.3s ease;
 }
 
-/* Responsive layout */
-@media (max-width: 768px) {
-  .card-box {
-    width: 100%;
-  }
-}
-select {
+/* Button Styling */
+.select {
   padding: 6px 12px;
   margin: 0 0.25rem;
   background-color: #1e1e1e;
@@ -143,36 +138,6 @@ select {
 
 .predict-btn:hover {
   background-color: #00a58a;
-}
-
-.table-container {
-  width: 100%;
-  border-collapse: separate;
-}
-
-.table-container th {
-  padding: 12px;
-  text-align: left;
-  color: #ffffff;
-  background-color: #1E1E1E;
-}
-
-.table-container td {
-  padding: 12px;
-  text-align: left;
-  color: #dddddd;
-  border-bottom: 1px solid #333;
-}
-
-.match-title {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem; /* Space between elements */
-}
-
-.team {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem; /* Space between logo and team name */
+  transform: scale(1.1);
+  transition: transform 0.2s ease, background-color 0.3s ease;
 }
