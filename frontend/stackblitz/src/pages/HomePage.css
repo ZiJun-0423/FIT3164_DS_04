@@ -1,0 +1,178 @@
+.home-container {
+  background-color: #121212;
+  color: #fff;
+  min-height: 100vh;
+  font-family: 'Poppins'
+}
+
+.hero-section {
+  text-align: center;
+  padding: 1rem 2rem 1rem;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+
+.button-group {
+  margin-top: 1.5rem;
+}
+
+.main-button {
+  margin: 0 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #00bfa6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.card-container {
+  display: flex;
+  justify-content: space-around;
+  padding: 2rem;
+  background-color: #1e1e1e;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card-box {
+  background: #2c2c2c;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 33%;
+  text-align: center;
+  color: #fff;
+  min-width: 300px;
+}
+
+.match-table {
+  width: 100%;
+  color: #fff;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.match-table th,
+.match-table td {
+  padding: 0.5rem;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: left;
+}
+
+.mini-logo {
+  width: 28px;
+  height: auto;
+  border-radius: 5px;
+}
+
+/* LIVE dot effect */
+.live-dot {
+  color: red;
+  font-size: 1.2rem;
+  margin-left: 0.4rem;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+.card-box {
+  background: #2c2c2c;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 25%;
+  text-align: center;
+  color: #fff;
+  min-width: 280px;
+  box-shadow: 0 0 8px rgba(0, 191, 166, 0.2);
+}
+
+/* Hover effect on rows */
+.match-table tr:hover {
+  background-color: #333;
+  transition: background 0.3s ease;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .card-box {
+    width: 100%;
+  }
+}
+select {
+  padding: 6px 12px;
+  margin: 0 0.25rem;
+  background-color: #1e1e1e;
+  color: #fff;
+  border: 1px solid #00bfa6;
+  border-radius: 4px;
+}
+
+.predict-btn {
+  padding: 8px 16px;
+  background-color: #00bfa6;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.3s;
+}
+
+.predict-btn:hover {
+  background-color: #00a58a;
+}
+
+.table-container {
+  width: 100%;
+  border-collapse: separate;
+}
+
+.table-container th {
+  padding: 12px;
+  text-align: left;
+  color: #ffffff;
+  background-color: #1E1E1E;
+}
+
+.table-container td {
+  padding: 12px;
+  text-align: left;
+  color: #dddddd;
+  border-bottom: 1px solid #333;
+}
+
+.match-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem; /* Space between elements */
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Space between logo and team name */
+}
