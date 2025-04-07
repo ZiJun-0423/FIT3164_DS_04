@@ -71,8 +71,9 @@ li a:hover{
   color: white;
   border-radius: 5px;
   text-align: center;
-  height: 80px; /* Adjust height */
-  background-size: cover; /* Ensures the background image covers the entire button */
+  width: 300px;
+  height: 350px; /* Adjust height */
+  background-size: contain; /* Ensures the background image covers the entire button */
   background-position: center; /* Centers the logo */
 }
 
