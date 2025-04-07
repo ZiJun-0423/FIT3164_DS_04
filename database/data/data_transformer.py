@@ -29,18 +29,21 @@ def clean_round(rounds):
     return rounds  # If it's already numeric or NaN, return as is
 
 # Read the CSV files
-df_git = pd.read_csv("aws_database/data/clean_data_git/git_data_merged.csv")
-df_kaggle = pd.read_csv("backend/data/clean_data_kaggle/cleaned_kaggle.csv")
+df_git = pd.read_csv("database/data/clean_data_git/git_data_merged.csv")
+df_kaggle = pd.read_csv("database/data/clean_data_kaggle/cleaned_kaggle.csv")
 
 #standardize round format
 df_git['round_num'] = df_git['round_num'].astype(str).apply(clean_round)
 df_kaggle['round'] = df_kaggle['round'].astype(str).apply(clean_round)
 
 #standardize team names
+# add rapidfuzz for better matching
+from rapidfuzz import process, fuzz
+
 df_git['team_1_team_name'] = df_git['team_1_team_name'].astype(str).apply(clean_team_name)
 df_git['team_2_team_name'] = df_git['team_2_team_name'].astype(str).apply(clean_team_name)
-df_kaggle['team1'] = df_kaggle['team1'].apply(clean_team_name)
-df_kaggle['team2'] = df_kaggle['team2'].apply(clean_team_name)
+df_kaggle['team1'] = df_kaggle['team1'].astype(str).apply(clean_team_name)
+df_kaggle['team2'] = df_kaggle['team2'].astype(str).apply(clean_team_name)
 
 #generating match_id
 # Match ID generation based on year, round, and sorted team names
@@ -49,6 +52,7 @@ df_git['match_id'] = df_git.apply(lambda row: (row['year'], row['round_num'], tu
 
 df_merged = pd.merge(df_git, df_kaggle, how= 'left')
 
+# drop unnecessary columns
 # df_merged = df_merged.drop(columns=['match_id', 'Unnamed: 0', 'team1', 'round', 'team2', 'goals_team1','goals_team2','behinds_team1',
 # 'behinds_team2','score_team1','score_team2'])
 
@@ -63,21 +67,21 @@ df_merged = df_merged.rename(columns={
     'team_1_q2_behinds': 'team1_q2_behinds',
     'team_1_q3_goals': 'team1_q3_goals',
     'team_1_q3_behinds': 'team1_q3_behinds',
-    'team_1_final_goals': 'team1_final_goals',
-    'team_1_final_behinds': 'team1_final_behinds',
+    'team_1_final_goals': 'team1_q4_goals',
+    'team_1_final_behinds': 'team1_q4_behinds',
     'team_2_q1_goals': 'team2_q1_goals',
     'team_2_q1_behinds': 'team2_q1_behinds',
     'team_2_q2_goals': 'team2_q2_goals',
     'team_2_q2_behinds': 'team2_q2_behinds',
     'team_2_q3_goals': 'team2_q3_goals',
     'team_2_q3_behinds': 'team2_q3_behinds',
-    'team_2_final_goals': 'team2_final_goals',
-    'team_2_final_behinds': 'team2_final_behinds'
+    'team_2_final_goals': 'team2_q4_goals',
+    'team_2_final_behinds': 'team2_q4_behinds'
 })
 
-#generating team scores
-df_merged['team1_score'] = 6 * df_merged['team1_final_goals'] + df_merged['team1_final_behinds']
-df_merged['team2_score'] = 6 * df_merged['team2_final_goals'] + df_merged['team2_final_behinds']
+#generating team scores [deprecated]
+# df_merged['team1_score'] = 6 * df_merged['team1_final_goals'] + df_merged['team1_final_behinds']
+# df_merged['team2_score'] = 6 * df_merged['team2_final_goals'] + df_merged['team2_final_behinds']
 
-df_merged.to_csv("backend/data/merged_data.csv")
+df_merged.to_csv("database/data/merged_data.csv")
 print("data cleaned and merged!")
