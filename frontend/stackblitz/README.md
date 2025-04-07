@@ -17,6 +17,8 @@ Some of the stuffs you might need to see the website:
 npm  (Check with npm -v, should be higher than 10.9.2)
 node (Check with npm -v, should be higher than 18.x.x but download the latest one and it should be v22.x.x)
 
+cd .\frontend\stackblitz\
+
 Then npm install
 There might be some error, don't worry about it.
 
