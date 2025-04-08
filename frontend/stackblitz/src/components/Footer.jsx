@@ -19,11 +19,12 @@ const Footer = () =>{
                     </a>
                 </div>
                 <div className="sb_footer-links-div-2">
-                    <h4>Acknowledgments</h4>
+                    <h4>Partners</h4>
                         <p>Developed by Team DS_04 as part of Monash University’s Capstone Project.</p>
                         <p>This website is a student project and not affiliated with any official football organization.</p>
                 </div>
                 <div className="sb_footer-links-div-2">
+                    <h4>Acknowledgments</h4>
                     <p>In the spirit of reconciliation the AFL acknowledges the Traditional Custodians of country throughout Australia and their connections to land, sea and community. We pay our respect to their Elders past and present and extend that respect to all Aboriginal and Torres Strait Islander peoples today.</p>
                 </div>       
             </div>
