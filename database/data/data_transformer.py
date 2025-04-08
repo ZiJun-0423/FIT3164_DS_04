@@ -9,7 +9,8 @@ def clean_round(rounds):
         'Preliminary Final': 'PF',
         'Qualifying Final': 'QF',
         'Elimination Final': 'EF',
-        'Grand Final': 'GF'
+        'Grand Final': 'GF',
+        'Semi Final': 'SF'
     }
     
     if isinstance(rounds, str):
@@ -53,8 +54,8 @@ df_git['match_id'] = df_git.apply(lambda row: (row['year'], row['round_num'], tu
 df_merged = pd.merge(df_git, df_kaggle, how= 'left')
 
 # drop unnecessary columns
-# df_merged = df_merged.drop(columns=['match_id', 'Unnamed: 0', 'team1', 'round', 'team2', 'goals_team1','goals_team2','behinds_team1',
-# 'behinds_team2','score_team1','score_team2'])
+df_merged = df_merged.drop(columns=['match_id', 'Unnamed: 0', 'team1', 'round', 'team2', 'goals_team1','goals_team2','behinds_team1',
+'behinds_team2','score_team1','score_team2'])
 
 # Rename columns to match the desired format
 df_merged = df_merged.rename(columns={
@@ -69,6 +70,8 @@ df_merged = df_merged.rename(columns={
     'team_1_q3_behinds': 'team1_q3_behinds',
     'team_1_final_goals': 'team1_q4_goals',
     'team_1_final_behinds': 'team1_q4_behinds',
+    'team_1_et_goals': 'team1_et_goals',
+    'team_1_et_behinds': 'team1_et_behinds',
     'team_2_q1_goals': 'team2_q1_goals',
     'team_2_q1_behinds': 'team2_q1_behinds',
     'team_2_q2_goals': 'team2_q2_goals',
@@ -76,12 +79,30 @@ df_merged = df_merged.rename(columns={
     'team_2_q3_goals': 'team2_q3_goals',
     'team_2_q3_behinds': 'team2_q3_behinds',
     'team_2_final_goals': 'team2_q4_goals',
-    'team_2_final_behinds': 'team2_q4_behinds'
+    'team_2_final_behinds': 'team2_q4_behinds',
+    'team_2_et_goals': 'team2_et_goals',
+    'team_2_et_behinds': 'team2_et_behinds'
 })
 
-#generating team scores [deprecated]
-# df_merged['team1_score'] = 6 * df_merged['team1_final_goals'] + df_merged['team1_final_behinds']
-# df_merged['team2_score'] = 6 * df_merged['team2_final_goals'] + df_merged['team2_final_behinds']
+#standardise date format
+def standardise_date(date_str):
+    try:
+        if "/" in date_str:
+            return pd.to_datetime(date_str, format='%d/%m/%Y %H:%M', errors='coerce').strftime('%d/%m/%Y %H:%M')
+        elif "-" in date_str:
+            return pd.to_datetime(date_str, format='%Y-%m-%d %H:%M', errors='coerce',).strftime('%d/%m/%Y %H:%M')
+    except Exception as e:
+        print(f"Failed to parse {date_str}: {e}")
+        return pd.NaT
 
+df_merged['date'] = df_merged['date'].astype(str).apply(standardise_date)
+
+#generating team scores 
+df_merged[['team1_et_goals', 'team1_et_behinds', 'team2_et_goals', 'team2_et_behinds']] = df_merged[['team1_et_goals', 'team1_et_behinds', 'team2_et_goals', 'team2_et_behinds']].fillna(0).astype(int)
+df_merged['team1_score'] = 6 * (df_merged['team1_q1_goals'] + df_merged['team1_q2_goals'] + df_merged['team1_q3_goals'] + df_merged['team1_q4_goals'] + df_merged['team1_et_goals']) + df_merged['team1_q1_behinds'] + df_merged['team1_q2_behinds'] +df_merged['team1_q3_behinds'] + df_merged['team1_q4_behinds'] + df_merged['team1_et_behinds']
+df_merged['team2_score'] = 6 * (df_merged['team2_q1_goals'] + df_merged['team2_q2_goals'] + df_merged['team2_q3_goals'] + df_merged['team2_q4_goals'] + df_merged['team2_et_goals']) + df_merged['team2_q1_behinds'] + df_merged['team2_q2_behinds'] +df_merged['team2_q3_behinds'] + df_merged['team2_q4_behinds'] + df_merged['team2_et_behinds']
+
+#generating winner column
+df_merged['winner'] = np.where(df_merged['team1_score'] > df_merged['team2_score'], df_merged['team1'], df_merged['team2'])
 df_merged.to_csv("database/data/merged_data.csv")
 print("data cleaned and merged!")
