@@ -2,6 +2,7 @@ import Navbar from '../components/Navbar';
 import './HomePage.css';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Footer from '../components/footer';
 
 export default function HomePage() {
   // Match information
@@ -95,6 +96,9 @@ export default function HomePage() {
           <tr>
             <th>Rank</th>
             <th>Club</th>
+            <th>Points For</th>
+            <th>Points Against</th>
+            <th>Percentage(%)</th>
             <th>ELO Score</th>
             <th>Win Streak</th>
           </tr>
@@ -103,23 +107,51 @@ export default function HomePage() {
           <tr>
             <td>1</td>
             <td>Collingwood</td>
+            <td>87</td>
+            <td>56</td>
+            <td>155%</td>
             <td>1650</td>
             <td>5 Wins</td>
           </tr>
           <tr>
             <td>2</td>
             <td>Richmond</td>
+            <td>83</td>
+            <td>59</td>
+            <td>141%</td>
             <td>1620</td>
             <td>3 Wins</td>
           </tr>
           <tr>
             <td>3</td>
             <td>Geelong</td>
+            <td>75</td>
+            <td>64</td>
+            <td>117%</td>
             <td>1585</td>
             <td>2 Wins</td>
           </tr>
+          <tr>
+            <td>4</td>
+            <td>Brisbane</td>
+            <td>72</td>
+            <td>66</td>
+            <td>109%</td>
+            <td>1580</td>
+            <td>1 Wins</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Carlton</td>
+            <td>75</td>
+            <td>69</td>
+            <td>109%</td>
+            <td>1575</td>
+            <td>1 Wins</td>
+          </tr>
         </tbody>
       </table>
+      <Footer />
     </div>
   );
 }
