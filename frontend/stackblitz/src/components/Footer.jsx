@@ -18,6 +18,18 @@ const Footer = () =>{
                         <p>Contact Us</p>
                     </a>
                 </div>
+                <div className="sb_footer-links-div-1">
+                    <h4>Resources</h4>
+                    <a href= "/employer">
+                        <p>Our dataset</p>
+                    </a>
+                    <a href= "/healthplan">
+                        <p>Github Repo</p>
+                    </a>
+                    <a href= "/employer">
+                        <p>Model Explanation</p>
+                    </a>
+                </div>
                 <div className="sb_footer-links-div-2">
                     <h4>Partners</h4>
                         <p>Developed by Team DS_04 as part of Monash University’s Capstone Project.</p>
