@@ -19,7 +19,7 @@ DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.for
 )
 
 #engine creation
-engine = create_engine(DB_URL, echo=True, future=True)
+engine = create_engine(DB_URL, echo=False, future=True)
 
 #create schema with engine
 Base.metadata.create_all(engine)
