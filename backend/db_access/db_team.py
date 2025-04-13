@@ -1,6 +1,6 @@
-from mysql.connector import Error
-from .db_base import get_db_connection
-
+from backend.db_access.db_base import get_db_session
+from database.schema import Team
+# from sqlalchemy.exc import IntegrityError
 
 def get_teams():
     """get teams from database
@@ -8,47 +8,30 @@ def get_teams():
     Returns:
        list of teams
     """
+    session = get_db_session()
     try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"error": "Failed to connect to the database"}, 500  
-              
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM teams")
-        teams = cursor.fetchall()
-        cursor.close()
-        connection.close()
-        
-        return teams
-    except Error as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}, 500
+        return session.query(Team).all()
     
-def get_team_by_id(team_id):
+    finally:
+        session.close()
+    
+def get_team_by_id(team_id:int):
     """get team by id from database
     this function retrieves a team from the database using the provided team ID.
 
     Args:
-        team_id (int): _description_
+        team_id (int): ID number of team to retrieve
     """
+    session = get_db_session()
     try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"error": "Failed to connect to the database"}, 500  
-              
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM teams WHERE id = %s", (team_id,))
-        team = cursor.fetchone()
-        cursor.close()
-        connection.close()
-        
-        if team is None:
-            return {"error": "Team not found"}, 404
-        
-        return team
-    except Error as e:
+        return session.query(Team).filter_by(id=team_id).first()
+            
+    except (ValueError, TypeError) as e:
         print(f"Error: {e}")
         return {"error": str(e)}, 500
+    
+    finally:
+        session.close()
 
 def add_team(team_data):
     pass
@@ -58,3 +41,10 @@ def update_team(team_id, team_data):
 
 def delete_team(team_id):
     pass
+
+if __name__ == "__main__":
+    # Example usage
+    teams = get_teams()
+    print(teams)
+    team = get_team_by_id(1)
+    print(team)

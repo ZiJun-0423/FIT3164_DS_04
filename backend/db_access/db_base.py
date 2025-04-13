@@ -1,27 +1,32 @@
-import mysql.connector
-from mysql.connector import Error
-from dotenv import load_dotenv
-import os
+import os, dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-def get_db_connection():
-    """get connection to MySQL database in AWS
-
+def get_db_session():
+    """get db connection
     Returns:
-       mysql.connector obj
+        sessionmaker object: sessionmaker object to interact with the database
     """
     try:
-        
-        # Load environment variables from .env file
-        load_dotenv()
-        connection = mysql.connector.connect(
-            host= os.getenv("DB_ENDPOINT"),
-            user= os.getenv("DB_USER"),
-            password= os.getenv("DB_PASSWORD"),
-            database= os.getenv("DB_NAME"),
+        dotenv.load_dotenv()
+        DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.format(
+            user=os.getenv('DB_USER'),
+            password=os.getenv('DB_PASSWORD'),
+            host=os.getenv('DB_ENDPOINT'),
+            port=os.getenv('DB_PORT'),
+            database=os.getenv('DB_NAME')
         )
-        if connection.is_connected():
-            return connection
-    except Error as e:
+        engine = create_engine(DB_URL, echo=False, future=True)
+        return sessionmaker(bind=engine)()
+    
+    except Exception as e:
         print(f"Error: {e}")
         return None
-        
+    
+if __name__ == "__main__":
+    session = get_db_session()
+    if session:
+        print("Database connection successful")
+    else:
+        print("Database connection failed")
+    
