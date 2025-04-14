@@ -2,7 +2,7 @@ from backend.db_access.db_base import get_db_session
 from database.schema import Team
 # from sqlalchemy.exc import IntegrityError
 
-def get_teams():
+def get_all_teams():
     """get teams from database
 
     Returns:
