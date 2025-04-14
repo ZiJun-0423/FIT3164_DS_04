@@ -1,20 +1,15 @@
-from dotenv import load_dotenv
-import os
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
-# from api.game_routes import game_routes
-# from api.team_routes import user_routes
+# from api.match_routes import matches_bp
+from backend.api.team_routes import teams_bp
 
 app = Flask(__name__)
 CORS(app)
 
-# Load environment variables from .env file
-# load_dotenv()
-# app.config['DB_ENDPOINT'] = os.getenv('DB_ENDPOINT')
-# app.config['DB_USER'] = os.getenv('DB_USER')
-# app.config['DB_PASSWORD'] = os.getenv('DB_PASSWORD')
-# app.config['DB_NAME'] = os.getenv('DB_NAME')
-
+# register blueprints for different routes
+app.register_blueprint(match_routes, url_prefix="/matches")
+# app.register_blueprint(user_routes, url_prefix="/api/user")
+app.register_blueprint(teams_bp, url_prefix="/teams")
 
 @app.route("/")
 def home():
