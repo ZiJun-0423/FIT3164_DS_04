@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from backend.db_access.db_match import get_all_matches
 matches_bp = Blueprint("matches", __name__, url_prefix="/matches")
 

@@ -1,4 +1,4 @@
-from backend.db_access.db_base import get_db_session
+from .db_base import get_db_session
 from database.schema import Match
 
 def get_all_matches():

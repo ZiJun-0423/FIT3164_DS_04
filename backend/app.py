@@ -1,13 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-# from api.match_routes import matches_bp
+from backend.api.match_routes import matches_bp
 from backend.api.team_routes import teams_bp
 
 app = Flask(__name__)
 CORS(app)
 
 # register blueprints for different routes
-app.register_blueprint(match_routes, url_prefix="/matches")
+app.register_blueprint(matches_bp, url_prefix="/matches")
 # app.register_blueprint(user_routes, url_prefix="/api/user")
 app.register_blueprint(teams_bp, url_prefix="/teams")
 
