@@ -2,7 +2,7 @@ from backend.db_access.db_base import get_db_session
 from database.schema import Team
 # from sqlalchemy.exc import IntegrityError
 
-def get_all_teams():
+def db_get_all_teams():
     """get teams from database
 
     Returns:
@@ -15,7 +15,7 @@ def get_all_teams():
     finally:
         session.close()
     
-def get_team_by_id(team_id:int):
+def db_get_team_by_id(team_id:int):
     """get team by id from database
     this function retrieves a team from the database using the provided team ID.
 
@@ -33,13 +33,13 @@ def get_team_by_id(team_id:int):
     finally:
         session.close()
 
-def add_team(team_data):
+def db_add_team(team_data):
     pass
 
-def update_team(team_id, team_data):
+def db_update_team(team_id, team_data):
     pass
 
-def delete_team(team_id):
+def db_delete_team(team_id):
     pass
 
 if __name__ == "__main__":
