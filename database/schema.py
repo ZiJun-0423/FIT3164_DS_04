@@ -24,14 +24,13 @@ class Match(Base):
     __tablename__ = 'matches'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(DateTime, nullable=False)
-    year = Column(Integer, nullable=False)
-    round = Column(String(3), nullable=False)
+    round_num = Column(String(3), nullable=False)
+    venue = Column(String(50), nullable=False)
     team1_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
     team2_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
     score_team1 = Column(Integer, nullable=False)
     score_team2 = Column(Integer, nullable=False)
     winner = Column(Integer, ForeignKey('teams.id'), nullable=False)
-    home_team = Column(Integer, ForeignKey('teams.id'), nullable=True)
     
     #relationships
     team1 = relationship("Team", foreign_keys=[team1_id], back_populates="matches_as_team1")
@@ -40,10 +39,10 @@ class Match(Base):
     elo_ratings = relationship("EloRatings", back_populates="match")
     
     #constraints
-    __table_args__ = (UniqueConstraint('date', 'round', 'team1_id', 'team2_id', name='unique_match_constraint'),)
+    __table_args__ = (UniqueConstraint('date', 'round_num', 'team1_id', 'team2_id', name='unique_match_constraint'),)
     
     def __repr__(self):
-        return f"<Match(id={self.id}, date={self.date}, round={self.round}, team1_id={self.team1_id}, team2_id={self.team2_id})>"
+        return f"<Match(id={self.id}, date={self.date}, round_num={self.round_num}, team1_id={self.team1_id}, team2_id={self.team2_id})>"
 class MatchStats(Base):
     __tablename__ = 'match_stats'
     id = Column(Integer, primary_key=True, autoincrement=True)

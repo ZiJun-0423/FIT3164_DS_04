@@ -49,8 +49,8 @@ with Session() as session:
     for _, row in merged_df.iterrows():
         match = Match(
             date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M'),
-            year=row['year'],
-            round=row['round'],
+            venue=row['venue'],
+            round_num=row['round'],
             team1_id=team_name_to_id[row['team1']],
             team2_id=team_name_to_id[row['team2']],
             score_team1=row['team1_score'],
