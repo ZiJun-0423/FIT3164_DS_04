@@ -39,23 +39,18 @@ df_kaggle['round'] = df_kaggle['round'].astype(str).apply(clean_round)
 
 #standardize team names
 # add rapidfuzz for better matching
-from rapidfuzz import process, fuzz
-
-df_git['team_1_team_name'] = df_git['team_1_team_name'].astype(str).apply(clean_team_name)
-df_git['team_2_team_name'] = df_git['team_2_team_name'].astype(str).apply(clean_team_name)
-df_kaggle['team1'] = df_kaggle['team1'].astype(str).apply(clean_team_name)
-df_kaggle['team2'] = df_kaggle['team2'].astype(str).apply(clean_team_name)
+# from rapidfuzz import process, fuzz
 
 #generating match_id
 # Match ID generation based on year, round, and sorted team names
-df_kaggle['match_id'] = df_kaggle.apply(lambda row: (row['year'], row['round'], tuple(sorted([row['team1'], row['team2']]))), axis=1)
-df_git['match_id'] = df_git.apply(lambda row: (row['year'], row['round_num'], tuple(sorted([row['team_1_team_name'], row['team_2_team_name']]))), axis=1)
+df_kaggle['match_id'] = df_kaggle.apply(lambda row: (row['year'], row['round'], tuple(sorted([clean_team_name(row['team1']), clean_team_name(row['team2'])]))), axis=1)
+df_git['match_id'] = df_git.apply(lambda row: (row['year'], row['round_num'], tuple(sorted([clean_team_name(row['team_1_team_name']), clean_team_name(row['team_2_team_name'])]))), axis=1)
 
-df_merged = pd.merge(df_git, df_kaggle, how= 'left')
+df_merged = pd.merge(df_git, df_kaggle, how= 'left', on='match_id')
 
 # drop unnecessary columns
 df_merged = df_merged.drop(columns=['match_id', 'Unnamed: 0', 'team1', 'round', 'team2', 'goals_team1','goals_team2','behinds_team1',
-'behinds_team2','score_team1','score_team2'])
+'behinds_team2','score_team1','score_team2', 'year_y'])
 
 # Rename columns to match the desired format
 df_merged = df_merged.rename(columns={
