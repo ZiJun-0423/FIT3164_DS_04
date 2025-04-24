@@ -32,12 +32,45 @@ unique_teams = pd.unique(merged_df[['team1', 'team2']].values.ravel())
 
 Session = sessionmaker(bind=engine)
 
+#rough mapping of teams to venues
+# This is a simplified mapping and may not reflect the actual venues for all teams.
+# Some teams may have multiple venues or have changed venues over time.
+# This mapping is based on the most common or current venue for each team.
+home_venue_map = {
+    'Fitzroy': 'Brunswick St',
+    'Carlton': 'Princes Park',
+    'Collingwood': 'Victoria Park',
+    'St Kilda': 'Junction Oval',
+    'Geelong': 'Kardinia Park',
+    'Essendon': 'Windy Hill',
+    'South Melbourne': 'Lake Oval',
+    'Melbourne': 'M.C.G.',
+    'University': 'East Melbourne',
+    'Richmond': 'Punt Rd',
+    'Footscray': 'Western Oval',
+    'North Melbourne': 'Arden St',
+    'Hawthorn': 'Glenferrie Oval',
+    'Sydney': 'S.C.G.',
+    'Brisbane Bears': 'Carrara',
+    'West Coast': 'Subiaco',
+    'Adelaide': 'Football Park',
+    'Fremantle': 'Subiaco',  # Earlier years
+    'Port Adelaide': 'Football Park',
+    'Western Bulldogs': 'Docklands',
+    'Brisbane Lions': 'Gabba',
+    'Kangaroos': 'Docklands',
+    'Gold Coast': 'Carrara',
+    'Greater Western Sydney': 'Sydney Showground'
+}
+
+
 #input team names into database
 with Session() as session:
     for team in unique_teams:
+        home_venue = home_venue_map.get(team, None)
         existing_team = session.query(Team).filter_by(name=team).first()
         if not existing_team:
-                new_team = Team(name=team)
+                new_team = Team(name=team, home_venue=home_venue)
                 session.add(new_team)
     session.commit()
     print("Teams added successfully!")

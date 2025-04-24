@@ -9,7 +9,7 @@ class Team(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False, unique=True)
     home_venue = Column(String(50), nullable=True)
-    established_year = Column(Integer, nullable=True)
+
 
     #relationships
     matches_as_team1 = relationship("Match", foreign_keys='Match.team1_id', back_populates="team1")
