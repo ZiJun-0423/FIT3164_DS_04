@@ -1,0 +1,63 @@
+/* Table container */
+.table-container {
+    width: 100%;
+    margin: 20px 0;
+    border-collapse: collapse;  /* Prevents table borders from doubling */
+    font-family: 'Arial', sans-serif;  /* Clean, readable font */
+  }
+  
+  .table-container th, .table-container td {
+    text-align: center;
+    padding: 10px 15px;  /* Adds some space around text */
+    border: 1px solid #ddd;  /* Light gray border */
+  }
+  
+  .table-container th {
+    background-color: #4CAF50;  /* Green background for header */
+    color: white;
+    font-weight: bold;
+  }
+  
+  .table-container td {
+    background-color: #f9f9f9;  /* Light background for rows */
+  }
+  
+  .table-container tr:nth-child(even) td {
+    background-color: #f2f2f2;  /* Alternate row color */
+  }
+  
+  .table-container tr:hover td {
+    background-color: #f1f1f1;  /* Hover effect for rows */
+  }
+  
+  .table-container .team {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .table-container .team img {
+    height: 30px;
+    width: 30px;
+    margin-right: 10px;
+  }
+  
+  .table-container .win-streak {
+    color: #4CAF50;
+    font-weight: bold;
+  }
+  
+  .table-container td, th {
+    font-size: 14px; /* Adjust text size */
+  }
+  
+  /* Make the table responsive for smaller screens */
+  @media screen and (max-width: 768px) {
+    .table-container {
+      font-size: 12px;
+    }
+    .table-container th, .table-container td {
+      padding: 8px 10px;
+    }
+  }
+  
