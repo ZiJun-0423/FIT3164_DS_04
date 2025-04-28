@@ -1,0 +1,121 @@
+:root {
+    --card-bg:         #ffffff;
+    --card-text:       #000000;
+    --border-color:    #cccccc;
+    --highlight-color: #00bfa6;
+  }
+  [data-theme='dark'] {
+    --card-bg:       #2c2c2c;
+    --card-text:     #ffffff;
+    --border-color:  #333333;
+  }
+  
+  /* Container */
+  .team-page-container {
+    background: linear-gradient(
+      135deg,
+      var(--bg-gradient-start),
+      var(--bg-gradient-end)
+    );
+    min-height: 100vh;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Loading */
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 4rem;
+  }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--highlight-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Team Header */
+  .team-header {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  .team-logo {
+    width: 80px;
+    margin-bottom: 1rem;
+  }
+  .team-header h1 {
+    margin: 0.5rem 0;
+  }
+  .venue {
+    color: var(--highlight-color);
+    font-weight: 500;
+  }
+  
+  /* ELO Section */
+  .elo-section {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  .elo-card {
+    display: inline-block;
+    background: var(--card-bg);
+    padding: 1.5rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 191, 166, 0.2);
+  }
+  .elo-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  /* Season Stats */
+  .stats-section {
+    padding: 2rem 1rem;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .stat-box {
+    background: var(--card-bg);
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  }
+  .stat-box h3 {
+    margin-bottom: 0.5rem;
+  }
+  .stat-box p {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  /* Last 5 Matches */
+  .matches-section {
+    padding: 2rem 1rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+  .matches-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .matches-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  /* Utility */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
