@@ -101,7 +101,7 @@ with Session() as session:
             team2_id=team_name_to_id[row['team2']],
             team1_score=row['team1_score'],
             team2_score=row['team2_score'],
-            winner=team_name_to_id[row['winner']],
+            winner = team_name_to_id[row['team1']] if row['team1_score'] > row['team2_score'] else (team_name_to_id[row['team2']] if row['team1_score'] < row['team2_score'] else None),
             home_team_id=home_team_id
         )
         matches_to_add.append(match)
@@ -127,9 +127,9 @@ with Session() as session:
             q3_behinds=row['team1_q3_behinds'],
             q4_behinds=row['team1_q4_behinds'],
             et_behinds=row['team1_et_behinds'],
-            total_goals=row['team1_q1_goals'] + row['team1_q2_goals'] + row['team1_q3_goals'] + row['team1_q4_goals'] + row['team1_et_goals'],
-            total_behinds=row['team1_q1_behinds'] + row['team1_q2_behinds'] + row['team1_q3_behinds'] + row['team1_q4_behinds'] + row['team1_et_behinds'],
-            total_score=(row['team1_q1_goals'] + row['team1_q2_goals'] + row['team1_q3_goals'] + row['team1_q4_goals'] + row['team1_et_goals']) * 6 + (row['team1_q1_behinds'] + row['team1_q2_behinds'] + row['team1_q3_behinds'] + row['team1_q4_behinds'] + row['team1_et_behinds']),
+            total_goals=row['team1_q4_goals'] if row['team1_et_goals'] == 0 else row['team1_et_goals'],
+            total_behinds=row['team1_q4_behinds'] if row['team1_et_behinds'] == 0 else row['team1_et_behinds'],
+            total_score=row['team1_score'],
             
             kicks=None if pd.isna(row['kicks_team1']) else row['kicks_team1'],
             marks=None if pd.isna(row['marks_team1']) else row['marks_team1'],
@@ -168,9 +168,9 @@ with Session() as session:
             q3_behinds=row['team2_q3_behinds'],
             q4_behinds=row['team2_q4_behinds'],
             et_behinds=row['team2_et_behinds'],
-            total_goals=row['team2_q1_goals'] + row['team2_q2_goals'] + row['team2_q3_goals'] + row['team2_q4_goals'] + row['team2_et_goals'],
-            total_behinds=row['team2_q1_behinds'] + row['team2_q2_behinds'] + row['team2_q3_behinds'] + row['team2_q4_behinds'] + row['team2_et_behinds'],
-            total_score=(row['team2_q1_goals'] + row['team2_q2_goals'] + row['team2_q3_goals'] + row['team2_q4_goals'] + row['team2_et_goals']) * 6 + (row['team2_q2_behinds'] + row['team2_q2_behinds'] + row['team2_q3_behinds'] + row['team2_q4_behinds'] + row['team2_et_behinds']),
+            total_goals=row['team1_q4_goals'] if row['team2_et_goals'] == 0 else row['team2_et_goals'],
+            total_behinds=row['team1_q4_behinds'] if row['team1_et_behinds'] == 0 else row['team1_et_behinds'],
+            total_score=row['team2_score'],
             
             kicks=None if pd.isna(row['kicks_team2']) else row['kicks_team2'],
             marks=None if pd.isna(row['marks_team2']) else row['marks_team2'],

@@ -30,7 +30,7 @@ class Match(Base):
     team2_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
     team1_score = Column(Integer, nullable=False)
     team2_score = Column(Integer, nullable=False)
-    winner = Column(Integer, ForeignKey('teams.id'), nullable=False)
+    winner = Column(Integer, ForeignKey('teams.id'), nullable=True)
     home_team_id = Column(Integer, ForeignKey('teams.id'), nullable=True)
     
     #relationships
@@ -98,8 +98,7 @@ class MatchStats(Base):
                       CheckConstraint('q2_goals >= 0', name='check_q2_goals_positive'),
                       CheckConstraint('q3_goals >= 0', name='check_q3_goals_positive'),
                       CheckConstraint('q4_goals >= 0', name='check_q4_goals_positive'),
-                      CheckConstraint('total_goals = q1_goals + q2_goals + q3_goals + q4_goals + et_goals', name='check_total_goals_match_stats'),
-                      CheckConstraint('total_behinds = q1_behinds + q2_behinds + q3_behinds + q4_behinds + et_behinds', name='check_total_behinds_match_stats'),)
+                      )
     
     def __repr__(self):
         return f"<MatchStats(id={self.id}, match_id={self.match_id}, team_id={self.team_id})>"
