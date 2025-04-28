@@ -1,7 +1,7 @@
 from .db_base import get_db_session
 from database.schema import Match
 
-def get_all_matches():
+def db_get_all_matches():
     """get all matches from database
 
     Returns:
@@ -14,7 +14,7 @@ def get_all_matches():
     finally:
         session.close()
 
-def get_game_by_id(game_id):
+def db_get_match_by_id(game_id):
     """get game by id from database
     this function retrieves a game from the database using the provided game ID.
 
@@ -32,18 +32,18 @@ def get_game_by_id(game_id):
     finally:
         session.close()
 
-def add_game(game_data):
+def db_add_game(game_data):
     pass
 
-def update_game(game_id, game_data):
+def Db_update_game(game_id, game_data):
     pass
 
-def delete_game(game_id):
+def db_delete_game(game_id):
     pass
 
 if __name__ == "__main__":
     # Example usage
-    matches = get_all_matches()
+    matches = db_get_all_matches()
     print(matches)
-    match = get_game_by_id(1)
+    match = db_get_match_by_id(1)
     print(match)
