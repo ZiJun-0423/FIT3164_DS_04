@@ -28,9 +28,10 @@ class Match(Base):
     venue = Column(String(50), nullable=False)
     team1_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
     team2_id = Column(Integer, ForeignKey('teams.id'), nullable=False, index=True)
-    score_team1 = Column(Integer, nullable=False)
-    score_team2 = Column(Integer, nullable=False)
+    team1_score = Column(Integer, nullable=False)
+    team2_score = Column(Integer, nullable=False)
     winner = Column(Integer, ForeignKey('teams.id'), nullable=False)
+    home_team_id = Column(Integer, ForeignKey('teams.id'), nullable=True)
     
     #relationships
     team1 = relationship("Team", foreign_keys=[team1_id], back_populates="matches_as_team1")

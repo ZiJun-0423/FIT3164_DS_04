@@ -73,22 +73,36 @@ with Session() as session:
                 new_team = Team(name=team, home_venue=home_venue)
                 session.add(new_team)
     session.commit()
-    print("Teams added successfully!")
+    print(f"{len(unique_teams)} teams added successfully!")
 
 #input match data into database
 with Session() as session:
     team_name_to_id = {team.name: team.id for team in session.query(Team).all()}
+    team_home_venue_map = {team.name: team.home_venue for team in session.query(Team).all()}
     matches_to_add = []
     for _, row in merged_df.iterrows():
+        team1_home_venue = team_home_venue_map[row['team1']].strip().lower()
+        team2_home_venue = team_home_venue_map[row['team2']].strip().lower()
+         # Determine the home team based on the venue
+        if row['venue'].strip().lower() == team1_home_venue and row['venue'] == team2_home_venue:
+            home_team_id = None  # Both teams have the same home venue, so no clear home team
+        elif row['venue'].strip().lower() == team1_home_venue:
+            home_team_id = team_name_to_id[row['team1']]  # team1 is the home team
+        elif row['venue'].strip().lower() == team2_home_venue:
+            home_team_id = team_name_to_id[row['team2']]  # team2 is the home team
+        else:
+            home_team_id = None  # Neither team has the venue as their home venue
+        
         match = Match(
             date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M'),
             venue=row['venue'],
             round_num=row['round'],
             team1_id=team_name_to_id[row['team1']],
             team2_id=team_name_to_id[row['team2']],
-            score_team1=row['team1_score'],
-            score_team2=row['team2_score'],
-            winner=team_name_to_id[row['winner']]
+            team1_score=row['team1_score'],
+            team2_score=row['team2_score'],
+            winner=team_name_to_id[row['winner']],
+            home_team_id=home_team_id
         )
         matches_to_add.append(match)
     session.bulk_save_objects(matches_to_add)
