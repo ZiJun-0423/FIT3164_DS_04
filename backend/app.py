@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from backend.api.match_routes import matches_bp
 from backend.api.team_routes import teams_bp
+from backend.api.elo_routes import elo_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -10,6 +11,7 @@ CORS(app)
 app.register_blueprint(matches_bp, url_prefix="/matches")
 # app.register_blueprint(user_routes, url_prefix="/api/user")
 app.register_blueprint(teams_bp, url_prefix="/teams")
+app.register_blueprint(elo_bp, url_prefix="/elo")
 
 @app.route("/")
 def home():
