@@ -11,7 +11,7 @@ def get_all_elo():
         return jsonify({"error": elo_ratings["error"]}), 500
     return jsonify([{"date": rating.date, "team_id": rating.team_id, "rating": rating.rating_after} for rating in elo_ratings]), 200
 
-@elo_bp.route("/filter_by_team/<int:team_id>", methods=["GET"])
+@elo_bp.route("/filter_by_team_id/<int:team_id>", methods=["GET"])
 def get_elo_by_team_id(team_id):
     """API route to get ELO ratings by team ID."""
     elo_ratings = db_elo.db_get_elo_by_team_id(team_id)
