@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFL Team Ratings & Predictions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .team-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-right: 10px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .prediction-meter {
+            height: 20px;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            border-radius: 10px;
+            position: relative;
+        }
+        .prediction-indicator {
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 30px;
+            background-color: #1e40af;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-800 mb-2">AFL Team Ratings & Predictions</h1>
+            <p class="text-gray-600">Historical ELO ratings visualization and match outcome prediction</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800">Team Rating History</h2>
+                    <div class="flex space-x-2">
+                        <div class="tooltip">
+                            <button id="reset-zoom" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <span class="tooltiptext">Reset Zoom</span>
+                        </div>
+                        <select id="team-select" class="border rounded px-3 py-1">
+                            <option value="all">All Teams</option>
+                            <!-- Teams will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="rating-chart"></canvas>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-blue-800 mb-2">Highest Rated Team</h3>
+                        <div id="highest-rated" class="flex items-center">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="font-medium text-green-800 mb-2">Most Improved Team</h3>
+                        <div id="most-improved" class="flex items-center">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Match Predictor</h2>
+                
+                <div class="mb-6">
+                    <div class="flex justify-between mb-2">
+                        <label for="home-team" class="font-medium">Home Team</label>
+                        <span id="home-rating" class="text-sm text-gray-500">Rating: --</span>
+                    </div>
+                    <select id="home-team" class="w-full border rounded px-3 py-2 mb-4">
+                        <!-- Teams will be populated by JavaScript -->
+                    </select>
+                    
+                    <div class="flex justify-between mb-2">
+                        <label for="away-team" class="font-medium">Away Team</label>
+                        <span id="away-rating" class="text-sm text-gray-500">Rating: --</span>
+                    </div>
+                    <select id="away-team" class="w-full border rounded px-3 py-2 mb-4">
+                        <!-- Teams will be populated by JavaScript -->
+                    </select>
+                    
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="home-advantage" class="mr-2" checked>
+                        <label for="home-advantage">Include home advantage (+30 rating)</label>
+                    </div>
+                    
+                    <button id="predict-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                        Predict Outcome
+                    </button>
+                </div>
+                
+                <div id="prediction-result" class="hidden fade-in bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-gray-800 mb-3">Prediction Result</h3>
+                    <div class="flex justify-between mb-1">
+                        <span id="home-win-percent" class="font-medium">--%</span>
+                        <span id="away-win-percent" class="font-medium">--%</span>
+                    </div>
+                    <div class="prediction-meter mb-4">
+                        <div id="prediction-indicator" class="prediction-indicator"></div>
+                    </div>
+                    <div class="text-center">
+                        <p id="prediction-text" class="font-medium text-lg"></p>
+                        <p id="confidence-text" class="text-sm text-gray-600"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h3 class="font-medium text-gray-800 mb-3">Recent Streaks</h3>
+                    <div id="streaks-container" class="space-y-3">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Team Comparison</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Rating</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peak Rating</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lowest Rating</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Form (Last 5)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Content will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AFL team data with logos and colors
+        const teams = [
+            { id: 'adel', name: 'Adelaide Crows', color: '#002B5C', logo: '../teamLogo/adelaideCrows.png' },
+            { id: 'bris', name: 'Brisbane Lions', color: '#A30046', logo: '../teamLogo/brisbaneLions.png' },
+            { id: 'carl', name: 'Carlton Blues', color: '#002E62', logo: '../teamLogo/carlton.png' },
+            { id: 'coll', name: 'Collingwood Magpies', color: '#000000', logo: '../teamLogo/collingwood.png' },
+            { id: 'ess', name: 'Essendon Bombers', color: '#CC2031', logo: '../teamLogo/essendon.png' },
+            { id: 'frem', name: 'Fremantle Dockers', color: '#4C6056', logo: '../teamLogo/fremantle.png' },
+            { id: 'geel', name: 'Geelong Cats', color: '#1D3D63', logo: '../teamLogo/geelongCats.png' },
+            { id: 'gold', name: 'Gold Coast Suns', color: '#D93A39', logo: '../teamLogo/goldCoastSuns.png' },
+            { id: 'gws', name: 'GWS Giants', color: '#F57921', logo: '../teamLogo/greatWesternSydneyGiants.png' },
+            { id: 'haw', name: 'Hawthorn Hawks', color: '#4D2004', logo: '../teamLogo/hawthornHawks.png' },
+            { id: 'melb', name: 'Melbourne Demons', color: '#061A33', logo: '../teamLogo/melbourne.png' },
+            { id: 'nth', name: 'North Melbourne Kangaroos', color: '#01388B', logo: '../teamLogo/northMelbourne.png' },
+            { id: 'port', name: 'Port Adelaide Power', color: '#00B2A9', logo: '../teamLogo/portAdelaide.png' },
+            { id: 'rich', name: 'Richmond Tigers', color: '#FEF002', textColor: '#000000', logo: '../teamLogo/richmondTigers.png' },
+            { id: 'stk', name: 'St Kilda Saints', color: '#ED0F05', logo: '../teamLogo/stKilda.png' },
+            { id: 'syd', name: 'Sydney Swans', color: '#E62631', logo: '../teamLogo/sydneySwan.png' },
+            { id: 'wc', name: 'West Coast Eagles', color: '#003399', logo: '../teamLogo/westCoastEagles.png' },
+            { id: 'wb', name: 'Western Bulldogs', color: '#014896', logo: '../teamLogo/westernBulldogs.jpg' }
+
+        ];
+
+        // Generate simulated historical ELO data (2010-2023)
+        function generateHistoricalData() {
+            const data = [];
+            const startDate = new Date(2010, 0, 1);
+            const endDate = new Date(2023, 11, 31);
+            
+            // Initialize ELO ratings (1500 is average)
+            let ratings = {};
+            teams.forEach(team => {
+                ratings[team.id] = {
+                    current: 1500,
+                    peak: 1500,
+                    lowest: 1500,
+                    history: [],
+                    form: []
+                };
+            });
+            
+            // Simulate matches over time
+            let currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                // Simulate 1-3 matches per week
+                const matchesThisWeek = Math.floor(Math.random() * 3) + 1;
+                
+                for (let i = 0; i < matchesThisWeek; i++) {
+                    // Randomly select two different teams
+                    const team1Index = Math.floor(Math.random() * teams.length);
+                    let team2Index;
+                    do {
+                        team2Index = Math.floor(Math.random() * teams.length);
+                    } while (team2Index === team1Index);
+                    
+                    const team1 = teams[team1Index];
+                    const team2 = teams[team2Index];
+                    
+                    // Home advantage (randomly assigned)
+                    const isTeam1Home = Math.random() > 0.5;
+                    const homeAdvantage = isTeam1Home ? 30 : -30;
+                    
+                    // Calculate win probabilities
+                    const q1 = Math.pow(10, ratings[team1.id].current / 400);
+                    const q2 = Math.pow(10, (ratings[team2.id].current + homeAdvantage) / 400);
+                    const expected1 = q1 / (q1 + q2);
+                    const expected2 = q2 / (q1 + q2);
+                    
+                    // Simulate match outcome (with some randomness)
+                    let team1Wins;
+                    if (Math.random() < expected1 - 0.1) team1Wins = true;
+                    else if (Math.random() > expected1 + 0.1) team1Wins = false;
+                    else team1Wins = Math.random() > 0.5; // Close match
+                    
+                    // Update ratings (K-factor of 32 for more volatility)
+                    const k = 32;
+                    const actual1 = team1Wins ? 1 : 0;
+                    const actual2 = 1 - actual1;
+                    
+                    const newRating1 = ratings[team1.id].current + k * (actual1 - expected1);
+                    const newRating2 = ratings[team2.id].current + k * (actual2 - expected2);
+                    
+                    // Update team histories
+                    ratings[team1.id].history.push({
+                        date: new Date(currentDate),
+                        rating: newRating1,
+                        opponent: team2.id,
+                        home: isTeam1Home,
+                        win: team1Wins
+                    });
+                    
+                    ratings[team2.id].history.push({
+                        date: new Date(currentDate),
+                        rating: newRating2,
+                        opponent: team1.id,
+                        home: !isTeam1Home,
+                        win: !team1Wins
+                    });
+                    
+                    // Update current, peak and lowest ratings
+                    ratings[team1.id].current = newRating1;
+                    ratings[team2.id].current = newRating2;
+                    
+                    if (newRating1 > ratings[team1.id].peak) ratings[team1.id].peak = newRating1;
+                    if (newRating1 < ratings[team1.id].lowest) ratings[team1.id].lowest = newRating1;
+                    
+                    if (newRating2 > ratings[team2.id].peak) ratings[team2.id].peak = newRating2;
+                    if (newRating2 < ratings[team2.id].lowest) ratings[team2.id].lowest = newRating2;
+                    
+                    // Update form (last 5 matches)
+                    ratings[team1.id].form.push(team1Wins ? 'W' : 'L');
+                    ratings[team2.id].form.push(!team1Wins ? 'W' : 'L');
+                    
+                    if (ratings[team1.id].form.length > 5) ratings[team1.id].form.shift();
+                    if (ratings[team2.id].form.length > 5) ratings[team2.id].form.shift();
+                }
+                
+                // Move to next week
+                currentDate.setDate(currentDate.getDate() + 7);
+            }
+            
+            return ratings;
+        }
+
+        // Generate the data
+        const historicalData = generateHistoricalData();
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate team selectors
+            const teamSelect = document.getElementById('team-select');
+            const homeTeamSelect = document.getElementById('home-team');
+            const awayTeamSelect = document.getElementById('away-team');
+            
+            teams.forEach(team => {
+                const option1 = document.createElement('option');
+                option1.value = team.id;
+                option1.textContent = team.name;
+                teamSelect.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = team.id;
+                option2.textContent = team.name;
+                homeTeamSelect.appendChild(option2.cloneNode(true));
+                
+                const option3 = document.createElement('option');
+                option3.value = team.id;
+                option3.textContent = team.name;
+                awayTeamSelect.appendChild(option3.cloneNode(true));
+            });
+            
+            // Set some interesting default matchups
+            homeTeamSelect.value = 'rich';
+            awayTeamSelect.value = 'coll';
+            
+            // Initialize chart
+            initializeChart();
+            
+            // Populate team table
+            populateTeamTable();
+            
+            // Find and display highest rated and most improved teams
+            displayHighlightTeams();
+            
+            // Display recent streaks
+            displayRecentStreaks();
+            
+            // Event listeners
+            teamSelect.addEventListener('change', updateChart);
+            document.getElementById('predict-btn').addEventListener('click', predictMatch);
+            document.getElementById('reset-zoom').addEventListener('click', resetChartZoom);
+            homeTeamSelect.addEventListener('change', updateTeamRatingDisplay);
+            awayTeamSelect.addEventListener('change', updateTeamRatingDisplay);
+            
+            // Initial update of team rating displays
+            updateTeamRatingDisplay();
+        });
+
+        // Chart variables
+        let ratingChart;
+        let allTeamsDataset;
+
+        // Initialize the main chart
+        function initializeChart() {
+            const ctx = document.getElementById('rating-chart').getContext('2d');
+            
+            // Prepare dataset for all teams
+            allTeamsDataset = teams.map(team => {
+                const teamData = historicalData[team.id].history;
+                return {
+                    label: team.name,
+                    data: teamData.map(point => ({
+                        x: point.date,
+                        y: point.rating,
+                        opponent: point.opponent,
+                        result: point.win ? 'W' : 'L',
+                        home: point.home
+                    })),
+                    borderColor: team.color,
+                    backgroundColor: team.color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false,
+                    tension: 0.1
+                };
+            });
+            
+            ratingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: allTeamsDataset
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'year',
+                                tooltipFormat: 'MMM yyyy'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'ELO Rating'
+                            },
+                            min: 1200,
+                            max: 1800
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const team = teams.find(t => t.name === context.dataset.label);
+                                    const opponent = teams.find(t => t.id === context.raw.opponent);
+                                    const result = context.raw.result === 'W' ? 'won' : 'lost';
+                                    const location = context.raw.home ? 'home' : 'away';
+                                    return [
+                                        `Rating: ${context.parsed.y.toFixed(0)}`,
+                                        `${result} vs ${opponent.name} (${location})`
+                                    ];
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'xy',
+                                speed: 0.1
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'xy'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+            
+            // Initially show all teams
+            updateChart();
+        }
+
+        // Update chart based on selected team
+        function updateChart() {
+            const selectedTeam = document.getElementById('team-select').value;
+            
+            if (selectedTeam === 'all') {
+                // Show all teams
+                ratingChart.data.datasets = allTeamsDataset;
+            } else {
+                // Show only selected team
+                const teamDataset = allTeamsDataset.find(ds => {
+                    const team = teams.find(t => t.id === selectedTeam);
+                    return ds.label === team.name;
+                });
+                
+                ratingChart.data.datasets = [teamDataset];
+            }
+            
+            ratingChart.update();
+        }
+
+        // Reset chart zoom
+        function resetChartZoom() {
+            if (ratingChart) {
+                ratingChart.resetZoom();
+            }
+        }
+
+        // Populate the team comparison table
+        function populateTeamTable() {
+            const tableBody = document.getElementById('team-table-body');
+            tableBody.innerHTML = '';
+            
+            // Sort teams by current rating (highest first)
+            const sortedTeams = [...teams].sort((a, b) => {
+                return historicalData[b.id].current - historicalData[a.id].current;
+            });
+            
+            sortedTeams.forEach(team => {
+                const teamData = historicalData[team.id];
+                const form = teamData.form.join(', ');
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <img src="${team.logo}" alt="${team.name}" class="team-logo">
+                            <span>${team.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-full" style="background-color: ${team.color}; color: ${team.textColor || 'white'}">
+                            ${teamData.current.toFixed(0)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-green-600 font-medium">${teamData.peak.toFixed(0)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-red-600 font-medium">${teamData.lowest.toFixed(0)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${form.split('').map(r => r === 'W' ? 
+                            '<span class="text-green-600 font-medium">W</span>' : 
+                            '<span class="text-red-600 font-medium">L</span>').join(', ')}
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Display highest rated and most improved teams
+        function displayHighlightTeams() {
+            // Find highest rated team
+            let highestTeam = teams[0];
+            let highestRating = historicalData[highestTeam.id].current;
+            
+            teams.forEach(team => {
+                if (historicalData[team.id].current > highestRating) {
+                    highestRating = historicalData[team.id].current;
+                    highestTeam = team;
+                }
+            });
+            
+            // Find most improved team (biggest rating increase in last 12 months)
+            let mostImprovedTeam = teams[0];
+            let biggestImprovement = 0;
+            
+            teams.forEach(team => {
+                const history = historicalData[team.id].history;
+                if (history.length < 2) return;
+                
+                // Find rating 12 months ago (or as close as possible)
+                const oneYearAgo = new Date();
+                oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+                
+                let closestIndex = 0;
+                for (let i = history.length - 1; i >= 0; i--) {
+                    if (new Date(history[i].date) <= oneYearAgo) {
+                        closestIndex = i;
+                        break;
+                    }
+                }
+                
+                const improvement = history[history.length - 1].rating - history[closestIndex].rating;
+                if (improvement > biggestImprovement) {
+                    biggestImprovement = improvement;
+                    mostImprovedTeam = team;
+                }
+            });
+            
+            // Update DOM
+            const highestRatedDiv = document.getElementById('highest-rated');
+            highestRatedDiv.innerHTML = `
+                <img src="${highestTeam.logo}" alt="${highestTeam.name}" class="team-logo">
+                <div>
+                    <span class="font-semibold">${highestTeam.name}</span>
+                    <div class="text-sm text-gray-600">Rating: ${highestRating.toFixed(0)}</div>
+                </div>
+            `;
+            
+            const mostImprovedDiv = document.getElementById('most-improved');
+            mostImprovedDiv.innerHTML = `
+                <img src="${mostImprovedTeam.logo}" alt="${mostImprovedTeam.name}" class="team-logo">
+                <div>
+                    <span class="font-semibold">${mostImprovedTeam.name}</span>
+                    <div class="text-sm text-gray-600">+${biggestImprovement.toFixed(0)} in last 12 months</div>
+                </div>
+            `;
+        }
+
+        // Display recent streaks (3+ wins or losses)
+        function displayRecentStreaks() {
+            const streaksContainer = document.getElementById('streaks-container');
+            streaksContainer.innerHTML = '';
+            
+            const streaks = [];
+            
+            teams.forEach(team => {
+                const history = historicalData[team.id].history;
+                if (history.length < 5) return;
+                
+                // Analyze last 5 matches
+                const recent = history.slice(-5);
+                const wins = recent.filter(m => m.win).length;
+                const losses = recent.length - wins;
+                
+                if (wins >= 3) {
+                    streaks.push({
+                        team,
+                        type: 'win',
+                        count: wins,
+                        lastMatch: recent[recent.length - 1].date
+                    });
+                } else if (losses >= 3) {
+                    streaks.push({
+                        team,
+                        type: 'loss',
+                        count: losses,
+                        lastMatch: recent[recent.length - 1].date
+                    });
+                }
+            });
+            
+            // Sort by streak length (descending)
+            streaks.sort((a, b) => b.count - a.count);
+            
+            // Display top 3 streaks
+            streaks.slice(0, 3).forEach(streak => {
+                const streakElement = document.createElement('div');
+                streakElement.className = 'flex items-center p-2 bg-gray-50 rounded';
+                
+                streakElement.innerHTML = `
+                    <img src="${streak.team.logo}" alt="${streak.team.name}" class="team-logo w-8 h-8">
+                    <div class="flex-1">
+                        <div class="font-medium">${streak.team.name}</div>
+                        <div class="text-sm ${streak.type === 'win' ? 'text-green-600' : 'text-red-600'}">
+                            ${streak.count}-match ${streak.type} streak
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        ${luxon.DateTime.fromJSDate(streak.lastMatch).toFormat('MMM yyyy')}
+                    </div>
+                `;
+                
+                streaksContainer.appendChild(streakElement);
+            });
+            
+            if (streaks.length === 0) {
+                streaksContainer.innerHTML = '<p class="text-gray-500">No significant streaks in recent matches.</p>';
+            }
+        }
+
+        // Update team rating display in predictor
+        function updateTeamRatingDisplay() {
+            const homeTeamId = document.getElementById('home-team').value;
+            const awayTeamId = document.getElementById('away-team').value;
+            
+            document.getElementById('home-rating').textContent = `Rating: ${historicalData[homeTeamId].current.toFixed(0)}`;
+            document.getElementById('away-rating').textContent = `Rating: ${historicalData[awayTeamId].current.toFixed(0)}`;
+        }
+
+        // Predict match outcome
+        function predictMatch() {
+            const homeTeamId = document.getElementById('home-team').value;
+            const awayTeamId = document.getElementById('away-team').value;
+            const includeHomeAdvantage = document.getElementById('home-advantage').checked;
+            
+            const homeTeam = teams.find(t => t.id === homeTeamId);
+            const awayTeam = teams.find(t => t.id === awayTeamId);
+            
+            const homeRating = historicalData[homeTeamId].current;
+            let awayRating = historicalData[awayTeamId].current;
+            
+            // Apply home advantage if selected
+            if (includeHomeAdvantage) {
+                awayRating -= 30; // Equivalent to giving home team +30
+            }
+            
+            // Calculate expected scores
+            const qHome = Math.pow(10, homeRating / 400);
+            const qAway = Math.pow(10, awayRating / 400);
+            
+            const expectedHome = qHome / (qHome + qAway);
+            const expectedAway = qAway / (qHome + qAway);
+            
+            // Convert to percentages
+            const homeWinPercent = (expectedHome * 100).toFixed(1);
+            const awayWinPercent = (expectedAway * 100).toFixed(1);
+            
+            // Update prediction result display
+            document.getElementById('home-win-percent').textContent = `${homeWinPercent}%`;
+            document.getElementById('away-win-percent').textContent = `${awayWinPercent}%`;
+            
+            // Position the indicator on the meter
+            const indicator = document.getElementById('prediction-indicator');
+            indicator.style.left = `${expectedHome * 100}%`;
+            
+            // Set prediction text
+            const predictionText = document.getElementById('prediction-text');
+            const confidenceText = document.getElementById('confidence-text');
+            
+            if (expectedHome > 0.65) {
+                predictionText.textContent = `Strong favorite: ${homeTeam.name}`;
+                predictionText.className = 'font-medium text-lg text-green-600';
+            } else if (expectedHome > 0.55) {
+                predictionText.textContent = `Slight favorite: ${homeTeam.name}`;
+                predictionText.className = 'font-medium text-lg text-green-600';
+            } else if (expectedAway > 0.65) {
+                predictionText.textContent = `Strong favorite: ${awayTeam.name}`;
+                predictionText.className = 'font-medium text-lg text-green-600';
+            } else if (expectedAway > 0.55) {
+                predictionText.textContent = `Slight favorite: ${awayTeam.name}`;
+                predictionText.className = 'font-medium text-lg text-green-600';
+            } else {
+                predictionText.textContent = 'Too close to call';
+                predictionText.className = 'font-medium text-lg text-yellow-600';
+            }
+            
+            // Set confidence text
+            const diff = Math.abs(expectedHome - expectedAway);
+            if (diff > 0.3) {
+                confidenceText.textContent = 'High confidence prediction';
+            } else if (diff > 0.15) {
+                confidenceText.textContent = 'Moderate confidence prediction';
+            } else {
+                confidenceText.textContent = 'Low confidence prediction';
+            }
+            
+            // Show the prediction result
+            document.getElementById('prediction-result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
