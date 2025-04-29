@@ -4,10 +4,12 @@ import logging
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from schema import Base, Team, Match, MatchStats
+from backend.db_access.schema import Base, Team, Match, MatchStats
+from backend.models.elo_db_stored import calculate_elo_static
+from backend.db_access.db_match import db_get_all_matches
+from backend.db_access.db_base import get_db_session
 import dotenv
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
 
 dotenv.load_dotenv()
 DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.format(
@@ -21,6 +23,9 @@ DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.for
 #engine creation
 engine = create_engine(DB_URL, echo=False, future=True)
 
+# Drop all tables if they exist
+Base.metadata.drop_all(engine)
+
 #create schema with engine
 Base.metadata.create_all(engine)
 
@@ -32,30 +37,77 @@ unique_teams = pd.unique(merged_df[['team1', 'team2']].values.ravel())
 
 Session = sessionmaker(bind=engine)
 
+#rough mapping of teams to venues
+# This is a simplified mapping and may not reflect the actual venues for all teams.
+# Some teams may have multiple venues or have changed venues over time.
+# This mapping is based on the most common or current venue for each team.
+home_venue_map = {
+    'Fitzroy': 'Brunswick St',
+    'Carlton': 'Princes Park',
+    'Collingwood': 'Victoria Park',
+    'St Kilda': 'Junction Oval',
+    'Geelong': 'Kardinia Park',
+    'Essendon': 'Windy Hill',
+    'South Melbourne': 'Lake Oval',
+    'Melbourne': 'M.C.G.',
+    'University': 'East Melbourne',
+    'Richmond': 'Punt Rd',
+    'Footscray': 'Western Oval',
+    'North Melbourne': 'Arden St',
+    'Hawthorn': 'Glenferrie Oval',
+    'Sydney': 'S.C.G.',
+    'Brisbane Bears': 'Carrara',
+    'West Coast': 'Subiaco',
+    'Adelaide': 'Football Park',
+    'Fremantle': 'Subiaco',  # Earlier years
+    'Port Adelaide': 'Football Park',
+    'Western Bulldogs': 'Docklands',
+    'Brisbane Lions': 'Gabba',
+    'Kangaroos': 'Docklands',
+    'Gold Coast': 'Carrara',
+    'Greater Western Sydney': 'Sydney Showground'
+}
+
+
 #input team names into database
 with Session() as session:
     for team in unique_teams:
+        home_venue = home_venue_map.get(team, None)
         existing_team = session.query(Team).filter_by(name=team).first()
         if not existing_team:
-                new_team = Team(name=team)
+                new_team = Team(name=team, home_venue=home_venue)
                 session.add(new_team)
     session.commit()
-    print("Teams added successfully!")
+    print(f"{len(unique_teams)} teams added successfully!")
 
 #input match data into database
 with Session() as session:
     team_name_to_id = {team.name: team.id for team in session.query(Team).all()}
+    team_home_venue_map = {team.name: team.home_venue for team in session.query(Team).all()}
     matches_to_add = []
     for _, row in merged_df.iterrows():
+        team1_home_venue = team_home_venue_map[row['team1']].strip().lower()
+        team2_home_venue = team_home_venue_map[row['team2']].strip().lower()
+         # Determine the home team based on the venue
+        if row['venue'].strip().lower() == team1_home_venue and row['venue'].strip().lower == team2_home_venue:
+            home_team_id = None  # Both teams have the same home venue, so no clear home team
+        elif row['venue'].strip().lower() == team1_home_venue:
+            home_team_id = team_name_to_id[row['team1']]  # team1 is the home team
+        elif row['venue'].strip().lower() == team2_home_venue:
+            home_team_id = team_name_to_id[row['team2']]  # team2 is the home team
+        else:
+            home_team_id = None  # Neither team has the venue as their home venue
+        
         match = Match(
             date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M'),
-            year=row['year'],
-            round=row['round'],
+            venue=row['venue'],
+            round_num=row['round'],
             team1_id=team_name_to_id[row['team1']],
             team2_id=team_name_to_id[row['team2']],
-            score_team1=row['team1_score'],
-            score_team2=row['team2_score'],
-            winner=team_name_to_id[row['winner']]
+            team1_score=row['team1_score'],
+            team2_score=row['team2_score'],
+            winner = team_name_to_id[row['team1']] if row['team1_score'] > row['team2_score'] else (team_name_to_id[row['team2']] if row['team1_score'] < row['team2_score'] else None),
+            home_team_id=home_team_id
         )
         matches_to_add.append(match)
     session.bulk_save_objects(matches_to_add)
@@ -80,9 +132,9 @@ with Session() as session:
             q3_behinds=row['team1_q3_behinds'],
             q4_behinds=row['team1_q4_behinds'],
             et_behinds=row['team1_et_behinds'],
-            total_goals=row['team1_q1_goals'] + row['team1_q2_goals'] + row['team1_q3_goals'] + row['team1_q4_goals'] + row['team1_et_goals'],
-            total_behinds=row['team1_q1_behinds'] + row['team1_q2_behinds'] + row['team1_q3_behinds'] + row['team1_q4_behinds'] + row['team1_et_behinds'],
-            total_score=(row['team1_q1_goals'] + row['team1_q2_goals'] + row['team1_q3_goals'] + row['team1_q4_goals'] + row['team1_et_goals']) * 6 + (row['team1_q1_behinds'] + row['team1_q2_behinds'] + row['team1_q3_behinds'] + row['team1_q4_behinds'] + row['team1_et_behinds']),
+            total_goals=row['team1_q4_goals'] if row['team1_et_goals'] == 0 else row['team1_et_goals'],
+            total_behinds=row['team1_q4_behinds'] if row['team1_et_behinds'] == 0 else row['team1_et_behinds'],
+            total_score=row['team1_score'],
             
             kicks=None if pd.isna(row['kicks_team1']) else row['kicks_team1'],
             marks=None if pd.isna(row['marks_team1']) else row['marks_team1'],
@@ -121,9 +173,9 @@ with Session() as session:
             q3_behinds=row['team2_q3_behinds'],
             q4_behinds=row['team2_q4_behinds'],
             et_behinds=row['team2_et_behinds'],
-            total_goals=row['team2_q1_goals'] + row['team2_q2_goals'] + row['team2_q3_goals'] + row['team2_q4_goals'] + row['team2_et_goals'],
-            total_behinds=row['team2_q1_behinds'] + row['team2_q2_behinds'] + row['team2_q3_behinds'] + row['team2_q4_behinds'] + row['team2_et_behinds'],
-            total_score=(row['team2_q1_goals'] + row['team2_q2_goals'] + row['team2_q3_goals'] + row['team2_q4_goals'] + row['team2_et_goals']) * 6 + (row['team2_q2_behinds'] + row['team2_q2_behinds'] + row['team2_q3_behinds'] + row['team2_q4_behinds'] + row['team2_et_behinds']),
+            total_goals=row['team2_q4_goals'] if row['team2_et_goals'] == 0 else row['team2_et_goals'],
+            total_behinds=row['team2_q4_behinds'] if row['team2_et_behinds'] == 0 else row['team2_et_behinds'],
+            total_score=row['team2_score'],
             
             kicks=None if pd.isna(row['kicks_team2']) else row['kicks_team2'],
             marks=None if pd.isna(row['marks_team2']) else row['marks_team2'],
@@ -150,3 +202,11 @@ with Session() as session:
     session.bulk_save_objects(match_stats_to_add)
     session.commit()
     print(f"{len(match_stats_to_add)} match stats added successfully!")
+    
+    matches = db_get_all_matches()
+    elo_ratings = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
+    session = get_db_session()
+    session.bulk_save_objects(elo_ratings)
+    session.commit()
+    session.close()
+    print(f"{len(elo_ratings)} elo ratings added successfully!")

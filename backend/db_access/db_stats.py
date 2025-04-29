@@ -1,7 +1,23 @@
-from database.schema import MatchStats
+from backend.db_access.schema import MatchStats
 from backend.db_access.db_base import get_db_session
 
-def get_stats_by_match(game_id: int):
+def db_get_all_stats():
+    """Function to retrieve all match statistics from the database.
+
+    Returns:
+        list: A list of MatchStats objects representing all match statistics.
+    """
+    session = get_db_session()
+    try:
+        stats = session.query(MatchStats).all()
+        return stats
+    except (ValueError, TypeError) as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}, 500
+    finally:
+        session.close()
+        
+def db_get_stats_by_match(game_id: int):
     """Function to retrieve match statistics for a specific game from the database.
 
     Args:
@@ -20,7 +36,7 @@ def get_stats_by_match(game_id: int):
     finally:
         session.close()
         
-def get_stats_by_team(team_id: int):
+def db_get_stats_by_team_id(team_id: int):
     """Function to retrieve all match statistics for a specific team from the database.
     
     Args:
@@ -38,7 +54,7 @@ def get_stats_by_team(team_id: int):
     finally:
         session.close()
 
-def get_stats_by_match_and_team(match_id: int, team_id:int):
+def db_get_stats_by_match_and_team(match_id: int, team_id:int):
     """Function to retrieve match statistics for a specific game and team from the database.
 
     Args:
@@ -59,20 +75,20 @@ def get_stats_by_match_and_team(match_id: int, team_id:int):
         session.close()
         
 
-def add_stat(stat_data):
+def db_add_stat(stat_data):
     pass
 
-def update_stat(stat_id, stat_data):
+def db_update_stat(stat_id, stat_data):
     pass
 
-def delete_stat(stat_id):
+def db_delete_stat(stat_id):
     pass
 
 if __name__ == "__main__":  
     # Example usage
-    stats = get_stats_by_match(1)
+    stats = db_get_stats_by_match(1)
     print(stats)
-    stats = get_stats_by_team(1)
+    stats = db_get_stats_by_team_id(1)
     print(stats)
-    stats = get_stats_by_match_and_team(1, 1)
+    stats = db_get_stats_by_match_and_team(1, 1)
     print(stats)
