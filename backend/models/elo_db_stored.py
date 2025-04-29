@@ -1,4 +1,4 @@
-from database.schema import EloRatings
+from backend.db_access.schema import EloRatings
 import math
 def calculate_elo_static(
     matches,
@@ -94,9 +94,9 @@ if __name__ == "__main__":
     from backend.db_access.db_match import db_get_all_matches
     matches = db_get_all_matches()
     
-    result = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
+    elo_ratings = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
     from backend.db_access.db_base import get_db_session
     session = get_db_session()
-    session.bulk_save_objects(result)
+    session.bulk_save_objects(elo_ratings)
     session.commit()
     session.close()

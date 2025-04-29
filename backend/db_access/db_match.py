@@ -1,5 +1,5 @@
 from .db_base import get_db_session
-from database.schema import Match
+from backend.db_access.schema import Match
 
 def db_get_all_matches():
     """get all matches from database

@@ -1,6 +1,6 @@
 from mysql.connector import Error
 from backend.db_access.db_base import get_db_session
-from database.schema import EloRatings
+from backend.db_access.schema import EloRatings
 from sqlalchemy.exc import SQLAlchemyError
 
 def db_get_all_elo():

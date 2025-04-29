@@ -1,5 +1,5 @@
 from backend.db_access.db_base import get_db_session
-from database.schema import Team
+from backend.db_access.schema import Team
 # from sqlalchemy.exc import IntegrityError
 
 def db_get_all_teams():
@@ -25,7 +25,7 @@ def db_get_team_by_id(team_id:int):
     session = get_db_session()
     try:
         return session.query(Team).filter_by(id=team_id).first()
-            
+         
     except (ValueError, TypeError) as e:
         print(f"Error: {e}")
         return {"error": str(e)}, 500
@@ -44,7 +44,7 @@ def db_delete_team(team_id):
 
 if __name__ == "__main__":
     # Example usage
-    teams = get_teams()
+    teams = db_get_all_teams()
     print(teams)
-    team = get_team_by_id(1)
+    team = db_get_team_by_id(1)
     print(team)

@@ -1,4 +1,4 @@
-from database.schema import MatchStats
+from backend.db_access.schema import MatchStats
 from backend.db_access.db_base import get_db_session
 
 def db_get_stats_by_match(game_id: int):

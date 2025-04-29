@@ -4,10 +4,12 @@ import logging
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from schema import Base, Team, Match, MatchStats
+from backend.db_access.schema import Base, Team, Match, MatchStats
+from backend.models.elo_db_stored import calculate_elo_static
+from backend.db_access.db_match import db_get_all_matches
+from backend.db_access.db_base import get_db_session
 import dotenv
 
-logging.getLogger('sqlalchemy.engine').setLevel(logging.ERROR)
 
 dotenv.load_dotenv()
 DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.format(
@@ -20,6 +22,9 @@ DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.for
 
 #engine creation
 engine = create_engine(DB_URL, echo=False, future=True)
+
+# Drop all tables if they exist
+Base.metadata.drop_all(engine)
 
 #create schema with engine
 Base.metadata.create_all(engine)
@@ -84,7 +89,7 @@ with Session() as session:
         team1_home_venue = team_home_venue_map[row['team1']].strip().lower()
         team2_home_venue = team_home_venue_map[row['team2']].strip().lower()
          # Determine the home team based on the venue
-        if row['venue'].strip().lower() == team1_home_venue and row['venue'] == team2_home_venue:
+        if row['venue'].strip().lower() == team1_home_venue and row['venue'].strip().lower == team2_home_venue:
             home_team_id = None  # Both teams have the same home venue, so no clear home team
         elif row['venue'].strip().lower() == team1_home_venue:
             home_team_id = team_name_to_id[row['team1']]  # team1 is the home team
@@ -168,8 +173,8 @@ with Session() as session:
             q3_behinds=row['team2_q3_behinds'],
             q4_behinds=row['team2_q4_behinds'],
             et_behinds=row['team2_et_behinds'],
-            total_goals=row['team1_q4_goals'] if row['team2_et_goals'] == 0 else row['team2_et_goals'],
-            total_behinds=row['team1_q4_behinds'] if row['team1_et_behinds'] == 0 else row['team1_et_behinds'],
+            total_goals=row['team2_q4_goals'] if row['team2_et_goals'] == 0 else row['team2_et_goals'],
+            total_behinds=row['team2_q4_behinds'] if row['team2_et_behinds'] == 0 else row['team2_et_behinds'],
             total_score=row['team2_score'],
             
             kicks=None if pd.isna(row['kicks_team2']) else row['kicks_team2'],
@@ -197,3 +202,11 @@ with Session() as session:
     session.bulk_save_objects(match_stats_to_add)
     session.commit()
     print(f"{len(match_stats_to_add)} match stats added successfully!")
+    
+    matches = db_get_all_matches()
+    elo_ratings = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
+    session = get_db_session()
+    session.bulk_save_objects(elo_ratings)
+    session.commit()
+    session.close()
+    print(f"{len(elo_ratings)} elo ratings added successfully!")
