@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-import logging
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
