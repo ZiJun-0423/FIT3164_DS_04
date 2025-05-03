@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import MiniDateSelector from '../components/DatePicker';
 import './HomePage.css';
 
 const API = 'http://127.0.0.1:5000';
@@ -16,6 +17,8 @@ export default function HomePage() {
   const [recentMatches, setRecentMatches] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [showElo, setShowElo]           = useState(false);
+//   const [selectedDate, setSelectedDate] = useState(null);
+//   const [rankings, setRankings] = useState([])
 
   useEffect(() => {
     Promise.all([
