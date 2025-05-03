@@ -101,7 +101,7 @@ def get_team_rankings(date_str):
                 func.sum(Match.team1_score).label("pf"),
                 func.sum(Match.team2_score).label("pa"),
                 func.sum(case((Match.winner == team_id, 1), else_=0)).label("wins"),
-                func.sum(case((Match.winner == None, 1), else_=0)).label("draws"),
+                func.sum(case((Match.winner is None, 1), else_=0)).label("draws"),
                 func.sum(case(((Match.winner != team_id) & (Match.winner != None), 1), else_=0)).label("losses")
             ).filter(
                 extract('year', Match.date) == date.year,
@@ -127,11 +127,19 @@ def get_team_rankings(date_str):
             # Accumulate totals
             total = {
                 "team_id": team_id,
+                "team_name": session.query(Team.name).filter_by(id=team_id).first()[0],
                 "points_for": 0,
                 "points_against": 0,
+                "percentage": 0,
                 "wins": 0,
                 "losses": 0,
-                "draws": 0
+                "draws": 0,
+                "elo": (
+                        session.query(EloRatings.rating_after)
+                        .filter(EloRatings.team_id == team_id, EloRatings.date <= date)
+                        .order_by(EloRatings.date.desc())  # get the latest BEFORE the date
+                        .first()[0]
+                )
             }
             for row in all_rows:
                 total["points_for"] += row.pf or 0
@@ -139,7 +147,8 @@ def get_team_rankings(date_str):
                 total["wins"] += row.wins or 0
                 total["losses"] += row.losses or 0
                 total["draws"] += row.draws or 0
-
+                
+            total["percentage"] = (total['points_for']/total['points_against'])*100 if total['points_against'] > 0 else 0
             rankings.append(total)
 
         return jsonify(rankings), 200
