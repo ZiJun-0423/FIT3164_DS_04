@@ -64,7 +64,7 @@ def get_team_by_id(team_id):
     finally:
         session.close()
     
-@teams_bp.route("/rankings/<string:date_str>", methods=["GET"])
+@teams_bp.route("/rankings/date/<string:date_str>", methods=["GET"])
 def get_team_rankings(date_str):
     """
     Returns team rankings up to the input date.
@@ -80,7 +80,7 @@ def get_team_rankings(date_str):
     """
     session = get_db_session()
     try:
-        date = datetime.strptime(date_str, "%d-%m-%Y")
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
 
         # Get all teams that have played in the current year
         team_ids_query = (

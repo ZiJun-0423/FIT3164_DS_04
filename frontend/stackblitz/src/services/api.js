@@ -19,7 +19,7 @@ import { API } from '../config.js';
  */
 export async function fetchTeamTable() {
     try {
-      const res = await fetch('/api/teams/rankings');
+      const res = await fetch(`{$API}/teams/rankings`);
       if (!res.ok) throw new Error('Failed to fetch team rankings');
       return await res.json();
     } catch (error) {
@@ -28,9 +28,9 @@ export async function fetchTeamTable() {
     }
   }
 
-export async function fetchAllTeam(){
+export async function fetchAllTeams(){
     try {
-        const res = await fetch('${API}/teams/');
+        const res = await fetch(`${API}/teams/`);
         if (!res.ok) throw new Error('failed to fetch teams');
         return await res.json();
     } catch (error) {
@@ -41,7 +41,7 @@ export async function fetchAllTeam(){
 
 export async function fetchAllMatches(){
     try {
-        const res = await fetch('${API}/matches/');
+        const res = await fetch(`${API}/matches/`);
         if (!res.ok) throw new Error('failed to fetch matches');
         return await res.json();
     } catch (error) {
@@ -51,8 +51,18 @@ export async function fetchAllMatches(){
 }
 export async function fetchMatchesByDate(date){
     try {
-        const res = await fetch('${API}/matches/${date}');
+        const res = await fetch(`${API}/matches/${date}`);
         if (!res.ok) throw new Error('failed to fetch matches by date');
+        return await res.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return []
+    }
+}
+export async function fetchTeamRankings(date){
+    try {
+        const res = await fetch(`${API}/teams/rankings/date/${date}`);
+        if (!res.ok) throw new Error('failed to fetch team rankings by date');
         return await res.json();
     } catch (error) {
         console.error('API Error:', error);

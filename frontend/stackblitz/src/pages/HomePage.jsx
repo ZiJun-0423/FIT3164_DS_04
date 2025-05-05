@@ -1,60 +1,95 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MiniDateSelector from '../components/DatePicker';
 import './HomePage.css';
-
-const API = 'http://127.0.0.1:5000';
+import {API} from '../config.js'
+import { useQuery } from '@tanstack/react-query';
+import { fetchAllMatches, fetchAllTeams,fetchTeamRankings } from '../services/api.js';
 
 // helper: normalize team name → logo filename
 const makeLogo = name =>
   `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
 
 export default function HomePage() {
-  const [teams, setTeams]               = useState([]);
-  const [allMatches, setAllMatches]     = useState([]);
-  const [recentMatches, setRecentMatches] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState('');
-  const [showElo, setShowElo]           = useState(false);
-//   const [selectedDate, setSelectedDate] = useState(null);
-//   const [rankings, setRankings] = useState([])
+  const [showElo, setShowElo]               = useState(false);
+  const [recentMatchCount, setRecentMatchCount] = useState(5);
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`${API}/teams/`).then(r => r.json()),
-      fetch(`${API}/matches/`).then(r => r.json()),
-    ])
-      .then(([teamsData, matchesData]) => {
-        setAllMatches(matchesData);
+  const {
+    data: teams,
+    isLoading: loadingTeams,
+    isError: errorTeams,
+    } = useQuery({ queryKey: ['teams'], queryFn: fetchAllTeams });
 
-        const teamsWithLogos = teamsData.map(t => ({
-          ...t,
-          logo: makeLogo(t.name),
-        }));
-        setTeams(teamsWithLogos);
+  const {
+    data: allMatches,
+    isLoading: loadingMatches,
+    isError: errorMatches,
+    } = useQuery({ queryKey: ['allMatches'], queryFn: fetchAllMatches });
 
-        const enriched = matchesData
-          .map(m => ({
-            ...m,
-            dateObj: new Date(m.date),
-            home: teamsWithLogos.find(t => t.id === m['team1 id']),
-            away: teamsWithLogos.find(t => t.id === m['team2 id']),
-          }))
-          .sort((a, b) => b.dateObj - a.dateObj)
-          .slice(0, 5);
+  const latestMatchDate = useMemo(() => {
+    return allMatches?.length
+      ? new Date(Math.max(...allMatches.map(m => new Date(m.date))))
+      : new Date(); // fallback
+  }, [allMatches]);
 
-        setRecentMatches(enriched);
-      })
-      .catch(console.error);
-  }, []);
+  const [selectedDate, setSelectedDate] = useState(latestMatchDate);
+
+  const {
+    data: Rankings,
+    isLoading: loadingRankings,
+    isError: errorRankings,
+  } = useQuery({queryKey: ['rankings'], queryFn: () => fetchTeamRankings(selectedDate.toISOString().split('T')[0]), enabled:!! selectedDate});
+
+  const teamsWithLogos = useMemo(() => {
+    if (!teams) return [];
+    return teams.map(team => ({
+      ...team,
+      logo: makeLogo(team.name),
+    }));
+  }, [teams]);
+
+  const enrichedMatches = useMemo(() => {
+    if (!allMatches || !teamsWithLogos.length) return [];
+  
+    return allMatches.map(match => ({
+      ...match,
+      dateObj: new Date(match.date),
+      home: teamsWithLogos.find(t => t.id === match['team1 id']),
+      away: teamsWithLogos.find(t => t.id === match['team2 id']),
+    }));
+  }, [allMatches, teamsWithLogos]);
+
+  const recentMatches = useMemo(() => {
+    if (!enrichedMatches.length) return [];
+    
+    // Sort by date descending and take the 5 most recent
+    return [...enrichedMatches]
+      .sort((a, b) => b.dateObj - a.dateObj)
+      .slice(0, recentMatchCount);
+  }, [enrichedMatches, recentMatchCount]);
+
+  const enrichedRankings = useMemo(() => {
+    if (!Rankings || !teamsWithLogos.length) return [];
+    return Rankings.map(team => ({
+      ...team,
+      team: teamsWithLogos.find(t => t.id === team.team_id)
+    }));
+  }, [Rankings, teamsWithLogos]);
+
+  console.log('selectedDate', selectedDate);
+  console.log('enrichedRankings', enrichedRankings);
+  if (loadingTeams || loadingMatches) return <div>Loading...</div>;
+  if (errorTeams || errorMatches) return <div>Error loading data.</div>;
 
   // render selected team's info card
   const renderTeamCard = () => {
     if (!selectedTeamId) return null;
-    const id = +selectedTeamId;
-    const team = teams.find(t => t.id === id);
-    const results = allMatches
+    const id = +selectedTeamId;``
+    const team = teamsWithLogos.find(t => t.id === id);
+    const results = enrichedMatches
       .filter(m => m.team1_id === id || m.team2_id === id)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 3);
@@ -69,8 +104,8 @@ export default function HomePage() {
         </div>
         <ul className="team-results">
           {results.map(m => {
-            const home = teams.find(t => t.id === m.team1_id);
-            const away = teams.find(t => t.id === m.team2_id);
+            const home = teamsWithLogos.find(t => t.id === m.team1_id);
+            const away = teamsWithLogos.find(t => t.id === m.team2_id);
             const date = new Date(m.date).toLocaleDateString(undefined, {
               month: 'short', day: 'numeric', year: 'numeric'
             });
@@ -117,7 +152,18 @@ export default function HomePage() {
         </select>
         {renderTeamCard()}
       </section>
-
+      <label>
+      Show recent matches:&nbsp;
+      <select
+        value={recentMatchCount}
+        onChange={(e) => setRecentMatchCount(parseInt(e.target.value))}
+      >
+        <option value={3}>3</option>
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+      </select>
+      </label>
       {/* Recent Matches */}
       <section className="recent-section">
         <h2>Recent Matches</h2>
@@ -156,7 +202,7 @@ export default function HomePage() {
           )}
         </div>
       </section>
-
+      <MiniDateSelector defaultDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/>
       {/* Standings Table */}
       <section className="table-section">
         <h2>Team Standings</h2>
@@ -174,24 +220,33 @@ export default function HomePage() {
               </tr>
             </thead>
             <tbody>
-              {teams.length > 0 ? (
-                teams.map((team, i) => (
-                  <tr key={team.id}>
-                    <td>{i + 1}</td>
-                    <td>{team.name}</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                  </tr>
-                ))
-              ) : (
+              {loadingRankings || errorRankings ? (
                 <tr>
-                  <td colSpan="7" className="loading-cell">
-                    <div className="spinner" />
+                  <td colSpan="7">
+                    <div className="loading-container">
+                      <div className="spinner" />
+                    </div>
                   </td>
                 </tr>
+              ) : (
+                enrichedRankings.map((ranking, i) => (
+                  <tr key={ranking.team_id}>
+                    <td>{i + 1}</td>
+                    <td>
+                      <img 
+                        src={ranking.team.logo} 
+                        alt={ranking.team.name}
+                        style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
+                      />
+                      {ranking.team.name}
+                    </td>
+                    <td>{ranking.points_for}</td>
+                    <td>{ranking.points_against}</td>
+                    <td>{ranking.percentage ? Number(ranking.percentage).toFixed(2) : '—'}</td>
+                    <td>{ranking.elo}</td>
+                    <td>{4}</td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
