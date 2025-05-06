@@ -57,8 +57,8 @@ export default function HomePage() {
     return allMatches.map(match => ({
       ...match,
       dateObj: new Date(match.date),
-      home: teamsWithLogos.find(t => t.id === match['team1 id']),
-      away: teamsWithLogos.find(t => t.id === match['team2 id']),
+      home: teamsWithLogos.find(t => t.id === match['team1_id']),
+      away: teamsWithLogos.find(t => t.id === match['team2_id']),
     }));
   }, [allMatches, teamsWithLogos]);
 
@@ -79,10 +79,10 @@ export default function HomePage() {
     }));
   }, [Rankings, teamsWithLogos]);
 
-  console.log('selectedDate', selectedDate);
-  console.log('enrichedRankings', enrichedRankings);
-  if (loadingTeams || loadingMatches) return <div>Loading...</div>;
-  if (errorTeams || errorMatches) return <div>Error loading data.</div>;
+//   console.log('selectedDate', selectedDate);
+//   console.log('recent', recentMatches);
+//   if (loadingTeams || loadingMatches) return <div>Loading...</div>;
+//   if (errorTeams || errorMatches) return <div>Error loading data.</div>;
 
   // render selected team's info card
   const renderTeamCard = () => {
@@ -111,7 +111,7 @@ export default function HomePage() {
             });
             return (
               <li key={m.id}>
-                <strong>{date}</strong> – {home.name} {m.score_team1}–{m.score_team2} {away.name}
+                <strong>{date}</strong> – {home.name} {m.team1_score}–{m.team2_score} {away.name}
               </li>
             );
           })}
@@ -146,7 +146,7 @@ export default function HomePage() {
           onChange={e => setSelectedTeamId(e.target.value)}
         >
           <option value="">Select team…</option>
-          {teams.map(t => (
+          {teamsWithLogos.map(t => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
@@ -178,7 +178,7 @@ export default function HomePage() {
                     month:   'short',
                     year:    'numeric',
                   })}{' '}
-                  | Round {m.round_num} @ {m.venue}
+                  | Round {m.round_number} @ {m.venue}
                 </p>
                 <div className="recent-teams">
                   <span className="team">
@@ -186,7 +186,7 @@ export default function HomePage() {
                     {m.home.name}
                   </span>
                   <span className="score">
-                    {m.score_team1}–{m.score_team2}
+                    {m.team1_score}–{m.team2_score}
                   </span>
                   <span className="team">
                     <img src={m.away.logo} alt={m.away.name} />
@@ -202,7 +202,7 @@ export default function HomePage() {
           )}
         </div>
       </section>
-      <MiniDateSelector defaultDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/>
+      <MiniDateSelector defaultDate={latestMatchDate} maxValidDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/>
       {/* Standings Table */}
       <section className="table-section">
         <h2>Team Standings</h2>
