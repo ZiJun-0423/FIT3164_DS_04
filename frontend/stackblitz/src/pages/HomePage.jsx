@@ -202,7 +202,13 @@ export default function HomePage() {
           )}
         </div>
       </section>
-      <MiniDateSelector defaultDate={latestMatchDate} maxValidDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/>
+      {latestMatchDate && (
+        <MiniDateSelector
+          defaultDate={latestMatchDate}
+          maxValidDate={latestMatchDate}
+          onDateChange={setSelectedDate}
+        />
+      )}
       {/* Standings Table */}
       <section className="table-section">
         <h2>Team Standings</h2>
@@ -212,15 +218,20 @@ export default function HomePage() {
               <tr>
                 <th>Rank</th>
                 <th>Club</th>
-                <th>Points For</th>
-                <th>Points Against</th>
-                <th>Percentage(%)</th>
+                <th>Played</th>
+                <th>Points</th>
+                <th>%</th>
+                <th>Won</th>
+                <th>Lost</th>
+                <th>Drawn</th>
+                <th>PF</th>
+                <th>PA</th>
                 <th>ELO Score</th>
                 <th>Win Streak</th>
               </tr>
             </thead>
             <tbody>
-              {loadingRankings || errorRankings ? (
+              {!enrichedRankings.length ? (
                 <tr>
                   <td colSpan="7">
                     <div className="loading-container">
@@ -229,23 +240,30 @@ export default function HomePage() {
                   </td>
                 </tr>
               ) : (
-                enrichedRankings.map((ranking, i) => (
-                  <tr key={ranking.team_id}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <img 
-                        src={ranking.team.logo} 
-                        alt={ranking.team.name}
-                        style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
-                      />
-                      {ranking.team.name}
-                    </td>
-                    <td>{ranking.points_for}</td>
-                    <td>{ranking.points_against}</td>
-                    <td>{ranking.percentage ? Number(ranking.percentage).toFixed(2) : '—'}</td>
-                    <td>{ranking.elo}</td>
-                    <td>{4}</td>
-                  </tr>
+                enrichedRankings
+                  .sort((a, b) => b.points - a.points)
+                  .map((ranking, i) => (
+                    <tr key={ranking.team_id}>
+                      <td>{i + 1}</td>
+                      <td>
+                        <img 
+                          src={ranking.team.logo} 
+                          alt={ranking.team.name}
+                          style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
+                        />
+                        {ranking.team.name}
+                      </td>
+                      <td>{ranking.played}</td>
+                      <td>{ranking.points}</td>
+                      <td>{ranking.percentage ? Number(ranking.percentage).toFixed(2) : '—'}</td>
+                      <td>{ranking.wins}</td>
+                      <td>{ranking.losses}</td>
+                      <td>{ranking.draws}</td>
+                      <td>{ranking.points_for}</td>
+                      <td>{ranking.points_against}</td>
+                      <td>{ranking.elo}</td>
+                      <td>{ranking.win_streak}</td>
+                    </tr>
                 ))
               )}
             </tbody>

@@ -149,6 +149,26 @@ def get_team_rankings(date_str):
                 total["draws"] += row.draws or 0
                 
             total["percentage"] = (total['points_for']/total['points_against'])*100 if total['points_against'] > 0 else 0
+            total["points"] = (total["wins"] * 4   + total["draws"] * 2 + total["losses"] * 0) if total["wins"] > 0 or total["draws"] > 0 or total["losses"] > 0 else 0
+            total['played'] = total["wins"] + total["losses"] + total["draws"]
+            past_matches = (
+                session.query(Match)
+                .filter(
+                    (Match.team1_id == team_id) | (Match.team2_id == team_id),
+                    Match.date < date
+                )
+                .order_by(Match.date.desc())
+                .all()
+            )
+
+            # Compute win streak
+            win_streak = 0
+            for match in past_matches:
+                if match.winner != team_id:
+                    break
+                win_streak += 1
+                
+            total["win_streak"] = win_streak
             rankings.append(total)
 
         return jsonify(rankings), 200
