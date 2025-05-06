@@ -15,7 +15,7 @@ def get_all_matches():
     session = get_db_session()
     try:
         matches = session.query(Match).all()
-        return jsonify([{"date": match.date, "round_num": match.round_num, "team1_id": match.team1_id, "team2_id": match.team2_id, "team1_score": match.team1_score, "team2_score":match.team2_score, "winner":match.winner, "home_team":match.home_team_id } for match in matches]), 200
+        return jsonify([{"date": match.date, "round_num": match.round_num, "team1_id": match.team1_id, "team2_id": match.team2_id, "team1_score": match.team1_score, "team2_score":match.team2_score, "winner":match.winner, "home_team":match.home_team_id, "venue": match.venue } for match in matches]), 200
     except SQLAlchemyError as e:
         print(f"sql error: {e}")
         return {"error": str(e)}, 500

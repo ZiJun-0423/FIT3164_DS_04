@@ -178,7 +178,7 @@ export default function HomePage() {
                     month:   'short',
                     year:    'numeric',
                   })}{' '}
-                  | Round {m.round_number} @ {m.venue}
+                  | Round {m.round_num} @ {m.venue}
                 </p>
                 <div className="recent-teams">
                   <span className="team">
