@@ -214,6 +214,39 @@
             { id: 'wb', name: 'Western Bulldogs', color: '#014896', logo: '../teamLogo/westernBulldogs.jpg' }
 
         ];
+        
+        const teamIdMap = {
+            1: 'fitzroy',                  // Not used in your frontend JS
+            2: 'carl',                     // Carlton
+            3: 'coll',                     // Collingwood
+            4: 'stk',                      // St Kilda
+            5: 'geel',                     // Geelong
+            6: 'ess',                      // Essendon
+            7: 'syd',                      // South Melbourne → Sydney (modern)
+            8: 'melb',                     // Melbourne
+            9: 'university',              // Not used
+            10: 'rich',                    // Richmond
+            11: 'wb',                      // Footscray → Western Bulldogs
+            12: 'nth',                     // North Melbourne
+            13: 'haw',                     // Hawthorn
+            14: 'syd',                     // Sydney (merged with 7)
+            15: 'bris',                    // Brisbane Bears (historical)
+            16: 'wc',                      // West Coast
+            17: 'adel',                    // Adelaide
+            18: 'frem',                    // Fremantle
+            19: 'port',                    // Port Adelaide
+            20: 'wb',                      // Western Bulldogs (duplicate of 11)
+            21: 'bris',                    // Brisbane Lions (merged from 15)
+            22: 'nth',                     // Kangaroos → North Melbourne
+            23: 'gold',                    // Gold Coast
+            24: 'gws'                      // Greater Western Sydney
+        };
+
+        const reverseTeamIdMap = Object.fromEntries(
+            Object.entries(teamIdMap).map(([key, value]) => [value, Number(key)])
+        );
+
+
 
         // Generate simulated historical ELO data (2010-2023)
         function generateHistoricalData() {
@@ -317,57 +350,58 @@
         }
 
         // Generate the data
-        const historicalData = generateHistoricalData();
+        let historicalData = {};
+
+        async function fetchHistoricalData() {
+            const response = await fetch("http://localhost:5000/elo/");
+            const eloRatings = await response.json();
+
+            console.log("Fetched data:", eloRatings);
+
+            // Group ratings by team_id
+            historicalData = eloRatings.reduce((acc, rating) => {
+                const { team_id, date, rating: elo } = rating;
+                if (!acc[team_id]) {
+                    acc[team_id] = {
+                        current: elo,
+                        history: [],
+                        form: [],
+                        peak: elo,
+                        lowest: elo
+                    };
+                }
+
+                acc[team_id].history.push({
+                    date: new Date(date),
+                    rating: elo
+                });
+
+                acc[team_id].current = elo;
+                acc[team_id].peak = Math.max(acc[team_id].peak, elo);
+                acc[team_id].lowest = Math.min(acc[team_id].lowest, elo);
+
+                return acc;
+            }, {});
+        }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            // Populate team selectors
-            const teamSelect = document.getElementById('team-select');
-            const homeTeamSelect = document.getElementById('home-team');
-            const awayTeamSelect = document.getElementById('away-team');
-            
-            teams.forEach(team => {
-                const option1 = document.createElement('option');
-                option1.value = team.id;
-                option1.textContent = team.name;
-                teamSelect.appendChild(option1);
-                
-                const option2 = document.createElement('option');
-                option2.value = team.id;
-                option2.textContent = team.name;
-                homeTeamSelect.appendChild(option2.cloneNode(true));
-                
-                const option3 = document.createElement('option');
-                option3.value = team.id;
-                option3.textContent = team.name;
-                awayTeamSelect.appendChild(option3.cloneNode(true));
-            });
-            
-            // Set some interesting default matchups
-            homeTeamSelect.value = 'rich';
-            awayTeamSelect.value = 'coll';
-            
-            // Initialize chart
+            (async function init() {
+            await fetchHistoricalData();  
+
+            populateSelectors();
             initializeChart();
-            
-            // Populate team table
             populateTeamTable();
-            
-            // Find and display highest rated and most improved teams
             displayHighlightTeams();
-            
-            // Display recent streaks
             displayRecentStreaks();
-            
-            // Event listeners
-            teamSelect.addEventListener('change', updateChart);
+            updateTeamRatingDisplay();
+
+            document.getElementById('team-select').addEventListener('change', updateChart);
             document.getElementById('predict-btn').addEventListener('click', predictMatch);
             document.getElementById('reset-zoom').addEventListener('click', resetChartZoom);
-            homeTeamSelect.addEventListener('change', updateTeamRatingDisplay);
-            awayTeamSelect.addEventListener('change', updateTeamRatingDisplay);
-            
-            // Initial update of team rating displays
-            updateTeamRatingDisplay();
+            document.getElementById('home-team').addEventListener('change', updateTeamRatingDisplay);
+            document.getElementById('away-team').addEventListener('change', updateTeamRatingDisplay);
+        })();
         });
 
         // Chart variables

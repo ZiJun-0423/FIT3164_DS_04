@@ -140,9 +140,16 @@
   margin-bottom: 1rem;
 }
 .recent-grid {
+  gap: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+}
+
+.auto-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.fixed-grid {
+  grid-template-columns: repeat(5, 1fr);
 }
 .recent-card {
   background: var(--card-bg);

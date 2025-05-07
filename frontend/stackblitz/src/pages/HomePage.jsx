@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import MiniDateSelector from '../components/DatePicker';
+import Dropdown from '../components/Dropdown.jsx';
 import './HomePage.css';
 import {API} from '../config.js'
 import { useQuery } from '@tanstack/react-query';
@@ -12,77 +13,126 @@ import { fetchAllMatches, fetchAllTeams,fetchTeamRankings } from '../services/ap
 const makeLogo = name =>
   `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
 
+// Get Season Year
+const getSeasonYear = (date) => {
+  const month = date.getMonth(); // Jan = 0
+  const year = date.getFullYear();
+  return month >= 2 ? year : year - 1; // AFL season usually starts in March (month 2)
+};
+
 export default function HomePage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
-  const [showElo, setShowElo]               = useState(false);
+  const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
 
+  // Teams
   const {
     data: teams,
     isLoading: loadingTeams,
     isError: errorTeams,
-    } = useQuery({ queryKey: ['teams'], queryFn: fetchAllTeams });
+  } = useQuery({ queryKey: ['teams'], queryFn: fetchAllTeams });
 
+  // All Matches
   const {
     data: allMatches,
     isLoading: loadingMatches,
     isError: errorMatches,
-    } = useQuery({ queryKey: ['allMatches'], queryFn: fetchAllMatches });
+  } = useQuery({ queryKey: ['allMatches'], queryFn: fetchAllMatches });
 
-  const latestMatchDate = useMemo(() => {
-    return allMatches?.length
-      ? new Date(Math.max(...allMatches.map(m => new Date(m.date))))
-      : new Date(); // fallback
-  }, [allMatches]);
-
-  const [selectedDate, setSelectedDate] = useState(latestMatchDate);
-
-  const {
-    data: Rankings,
-    isLoading: loadingRankings,
-    isError: errorRankings,
-  } = useQuery({queryKey: ['rankings'], queryFn: () => fetchTeamRankings(selectedDate.toISOString().split('T')[0]), enabled:!! selectedDate});
-
-  const teamsWithLogos = useMemo(() => {
-    if (!teams) return [];
-    return teams.map(team => ({
-      ...team,
-      logo: makeLogo(team.name),
-    }));
+  // Create a fast lookup map for teams with logos
+  const teamMap = useMemo(() => {
+    if (!teams) return {};
+    return teams.reduce((acc, team) => {
+      acc[team.id] = { ...team, logo: makeLogo(team.name) };
+      return acc;
+    }, {});
   }, [teams]);
 
+  // --- UTILITY: Determine season type based on date ---
+  const getSeasonFromDate = (date) => {
+    const month = date.getMonth(); // March = 2, September = 8
+    return month >= 8 ? 'Finals' : 'Regular';
+  };
+
+  // --- MEMO: Find latest match date from all matches ---
+  const latestMatchDate = useMemo(() => {
+    if (!allMatches?.length) return new Date();
+    return allMatches.reduce((latest, match) => {
+      const matchDate = new Date(match.date);
+      return matchDate > latest ? matchDate : latest;
+    }, new Date(0));
+  }, [allMatches]);
+
+  // --- MEMO: Derive default dropdown season from latest match ---
+  const defaultSeason = useMemo(() => {
+    return {
+      year: latestMatchDate.getFullYear(),
+      type: getSeasonFromDate(latestMatchDate),
+    };
+  }, [latestMatchDate]);
+
+  // --- STATE: Selected date for rankings (sets on first load or update) ---
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  // --- EFFECT: Set selectedDate on first load ---
+  useEffect(() => {
+    if (!allMatches?.length) return;
+
+    const today = new Date();
+    const hasTodayMatch = allMatches.some(match => {
+      const matchDate = new Date(match.date);
+      return matchDate.toDateString() === today.toDateString();
+    });
+
+    setSelectedDate(hasTodayMatch ? today : latestMatchDate);
+  }, [allMatches, latestMatchDate]);
+
+  // --- QUERY: Fetch rankings based on selected date ---
+  const {
+    data: rankings,
+    isLoading: loadingRankings,
+    isError: errorRankings,
+  } = useQuery({
+    queryKey: ['rankings', selectedDate?.toISOString().split('T')[0]],
+    queryFn: () => fetchTeamRankings(selectedDate.toISOString().split('T')[0]),
+    enabled: !!selectedDate,
+  });
+
+  // --- MEMO: Enrich matches with team data ---
   const enrichedMatches = useMemo(() => {
-    if (!allMatches || !teamsWithLogos.length) return [];
-  
+    if (!allMatches || !Object.keys(teamMap).length) return [];
     return allMatches.map(match => ({
       ...match,
       dateObj: new Date(match.date),
-      home: teamsWithLogos.find(t => t.id === match['team1 id']),
-      away: teamsWithLogos.find(t => t.id === match['team2 id']),
+      home: teamMap[match['team1 id']],
+      away: teamMap[match['team2 id']],
     }));
-  }, [allMatches, teamsWithLogos]);
+  }, [allMatches, teamMap]);
 
+
+  // Recent matches
   const recentMatches = useMemo(() => {
-    if (!enrichedMatches.length) return [];
-    
-    // Sort by date descending and take the 5 most recent
     return [...enrichedMatches]
       .sort((a, b) => b.dateObj - a.dateObj)
       .slice(0, recentMatchCount);
   }, [enrichedMatches, recentMatchCount]);
 
+  // Enriched rankings
   const enrichedRankings = useMemo(() => {
-    if (!Rankings || !teamsWithLogos.length) return [];
-    return Rankings.map(team => ({
+    if (!rankings || !Object.keys(teamMap).length) return [];
+    return rankings.map((team) => ({
       ...team,
-      team: teamsWithLogos.find(t => t.id === team.team_id)
+      team: teamMap[team.team_id],
     }));
-  }, [Rankings, teamsWithLogos]);
+  }, [rankings, teamMap]);
 
-  console.log('selectedDate', selectedDate);
-  console.log('enrichedRankings', enrichedRankings);
+  // Loading/Error UI
   if (loadingTeams || loadingMatches) return <div>Loading...</div>;
   if (errorTeams || errorMatches) return <div>Error loading data.</div>;
+
+  console.log('selectedDate', selectedDate);
+  console.log('latestMatchDate', latestMatchDate);
+  console.log('enrichedRankings', enrichedRankings);
 
   // render selected team's info card
   const renderTeamCard = () => {
@@ -152,6 +202,8 @@ export default function HomePage() {
         </select>
         {renderTeamCard()}
       </section>
+
+      {/* Show Recent Matches */}
       <label>
       Show recent matches:&nbsp;
       <select
@@ -164,10 +216,11 @@ export default function HomePage() {
         <option value={20}>20</option>
       </select>
       </label>
+
       {/* Recent Matches */}
       <section className="recent-section">
         <h2>Recent Matches</h2>
-        <div className="recent-grid">
+        <div className={`recent-grid ${recentMatchCount >= 5 ? 'fixed-grid' : 'auto-grid'}`}>
           {recentMatches.length > 0 ? (
             recentMatches.map((m, idx) => (
               <div className="recent-card" key={idx}>
@@ -202,7 +255,28 @@ export default function HomePage() {
           )}
         </div>
       </section>
-      <MiniDateSelector defaultDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/>
+
+      {/* Date Selector*/}
+      {/* <MiniDateSelector defaultDate={latestMatchDate} onDateChange={(date) => setSelectedDate(date)}/> */}
+
+      {/* Dropdown*/}
+      <Dropdown
+        defaultValue={defaultSeason}
+        onSeasonChange={(season) => {
+          console.log("Selected season:", season); // e.g., { year: 2024, type: 'Finals' }
+
+          // Map season to a representative date
+          const representativeDate = new Date(
+            season.year,
+            season.type === 'Finals' ? 8 : 2, // September (8) for Finals, March (2) for Regular
+            15 // Mid-month to avoid edge cases
+          );
+
+          setSelectedDate(representativeDate);
+        }}
+      />
+
+
       {/* Standings Table */}
       <section className="table-section">
         <h2>Team Standings</h2>
