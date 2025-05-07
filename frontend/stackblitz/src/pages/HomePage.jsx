@@ -134,7 +134,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="hero-section">
         <h1 className="hero-title">
-          Track AFL Team Rankings in Real Time!
+          Track AFL Team Rankings in All Time!
         </h1>
         <p className="hero-subtitle">
           Get live ELO ratings, match predictions, and team insights!
