@@ -17,10 +17,16 @@ Some of the stuffs you might need to see the website:
 npm  (Check with npm -v, should be higher than 10.9.2)
 node (Check with npm -v, should be higher than 18.x.x but download the latest one and it should be v22.x.x)
 
+You have to have these in terminal 1:
+pip install -r requirements.txt
+python -m backend.db_access.database_initialiser
+python -m backend.app
+
+And in terminal 2:
 cd .\frontend\stackblitz\
 
 Then npm install
-There might be some error, don't worry about it.
+(There might be some error, don't worry about it.)
 
 Then npm run dev.
 
