@@ -92,7 +92,7 @@ export default function HomePage() {
     const results = enrichedMatches
       .filter(m => m.team1_id === id || m.team2_id === id)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 3);
+      .slice(0, 5);
 
     return (
       <div className="team-info-card card-box">
@@ -100,7 +100,7 @@ export default function HomePage() {
         <div className="team-header">
           <span className="team-name">{team.name}</span>
           <span className="elo-score">ELO Score: —</span>
-          <span className="last3-label">Last 3 Results</span>
+          <span className="last3-label">Last 5 Results:</span>
         </div>
         <ul className="team-results">
           {results.map(m => {
@@ -110,8 +110,12 @@ export default function HomePage() {
               month: 'short', day: 'numeric', year: 'numeric'
             });
             return (
-              <li key={m.id}>
-                <strong>{date}</strong> – {home.name} {m.team1_score}–{m.team2_score} {away.name}
+              <li key={m.id} className="match-result">
+                <strong>{date}</strong> :&nbsp;
+                <img src={home.logo} alt={home.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {home.name} {m.team1_score}–{m.team2_score}
+                <img src={away.logo} alt={away.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {away.name}
               </li>
             );
           })}
