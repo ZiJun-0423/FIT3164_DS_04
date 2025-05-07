@@ -13,19 +13,27 @@
   --btn-text:          #ffffff;
 }
 
-[data-theme='dark'] {
+body[data-theme='dark'] {
   --bg-gradient-start: #121212;
   --bg-gradient-end:   #1e1e1e;
   --text-color:        #ffffff;
   --card-bg:           #2c2c2c;
   --card-text:         #ffffff;
-  --border-color:      #333333;
+  --border-color:      #00bfa6;
   --highlight-color:   #00bfa6;
   --select-bg:         #1e1e1e;
   --select-text:       #ffffff;
   --btn-bg:            #00bfa6;
   --btn-bg-hover:      #00a58a;
   --btn-text:          #ffffff;
+}
+
+select {
+  background-color: var(--select-bg);
+  color: var(--select-text);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 /* Container */

@@ -14,7 +14,7 @@ const makeLogo = name =>
 
 export default function HomePage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
-  const [showElo, setShowElo]               = useState(false);
+  const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
 
   const {
@@ -165,7 +165,7 @@ export default function HomePage() {
         <option value={3}>3</option>
         <option value={5}>5</option>
         <option value={10}>10</option>
-        <option value={20}>20</option>
+
       </select>
       </label>
       {/* Recent Matches */}
