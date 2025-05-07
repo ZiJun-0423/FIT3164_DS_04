@@ -156,7 +156,7 @@ export default function HomePage() {
         </select>
         {renderTeamCard()}
       </section>
-      <label>
+      <label className="recent-matches-label">
       Show recent matches:&nbsp;
       <select
         value={recentMatchCount}

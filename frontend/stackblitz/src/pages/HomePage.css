@@ -36,6 +36,10 @@ select {
   border-radius: 4px;
 }
 
+.recent-matches-label {
+  padding-left: 1.5rem;
+}
+
 /* Container */
 .home-container {
   background: linear-gradient(
@@ -69,12 +73,13 @@ select {
 /* Quick Team Jump */
 .team-search-section {
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 1.5rem;
   text-align: left;
 }
 .team-search-section label {
   font-weight: bold;
   margin-right: 0.5rem;
+  margin-bottom: 1 rem;
 }
 .team-search-section select {
   padding: 0.5rem 0.75rem;
@@ -285,6 +290,11 @@ select {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+.date-picker{
+  padding-left: 1.5rem;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -299,5 +309,17 @@ select {
   }
   .elo-card {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-search-section {
+    margin: 1rem; /* Reduce margin on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .team-search-section {
+    margin: 0.5rem; /* Further reduce margin on very small screens */
   }
 }

@@ -18,7 +18,7 @@ export default function MiniDateSelector({ onDateChange, defaultDate, maxValidDa
   };
 
   return (
-    <div>
+    <div className="date-picker">
       <label htmlFor="date-picker">Select or enter date:</label>
       <DatePicker
         id="date-picker"
