@@ -142,7 +142,7 @@ export default function HomePage() {
     const results = enrichedMatches
       .filter(m => m.team1_id === id || m.team2_id === id)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 3);
+      .slice(0, 5);
 
     return (
       <div className="team-info-card card-box">
@@ -150,7 +150,7 @@ export default function HomePage() {
         <div className="team-header">
           <span className="team-name">{team.name}</span>
           <span className="elo-score">ELO Score: —</span>
-          <span className="last3-label">Last 3 Results</span>
+          <span className="last3-label">Last 5 Results:</span>
         </div>
         <ul className="team-results">
           {results.map(m => {
@@ -160,8 +160,12 @@ export default function HomePage() {
               month: 'short', day: 'numeric', year: 'numeric'
             });
             return (
-              <li key={m.id}>
-                <strong>{date}</strong> – {home.name} {m.score_team1}–{m.score_team2} {away.name}
+              <li key={m.id} className="match-result">
+                <strong>{date}</strong> :&nbsp;
+                <img src={home.logo} alt={home.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {home.name} {m.team1_score}–{m.team2_score}
+                <img src={away.logo} alt={away.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {away.name}
               </li>
             );
           })}
@@ -196,7 +200,7 @@ export default function HomePage() {
           onChange={e => setSelectedTeamId(e.target.value)}
         >
           <option value="">Select team…</option>
-          {teams.map(t => (
+          {teamsWithLogos.map(t => (
             <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
@@ -239,7 +243,7 @@ export default function HomePage() {
                     {m.home.name}
                   </span>
                   <span className="score">
-                    {m.score_team1}–{m.score_team2}
+                    {m.team1_score}–{m.team2_score}
                   </span>
                   <span className="team">
                     <img src={m.away.logo} alt={m.away.name} />
@@ -286,15 +290,20 @@ export default function HomePage() {
               <tr>
                 <th>Rank</th>
                 <th>Club</th>
-                <th>Points For</th>
-                <th>Points Against</th>
-                <th>Percentage(%)</th>
+                <th>Played</th>
+                <th>Points</th>
+                <th>%</th>
+                <th>Won</th>
+                <th>Lost</th>
+                <th>Drawn</th>
+                <th>PF</th>
+                <th>PA</th>
                 <th>ELO Score</th>
                 <th>Win Streak</th>
               </tr>
             </thead>
             <tbody>
-              {loadingRankings || errorRankings ? (
+              {!enrichedRankings.length ? (
                 <tr>
                   <td colSpan="7">
                     <div className="loading-container">
@@ -303,23 +312,30 @@ export default function HomePage() {
                   </td>
                 </tr>
               ) : (
-                enrichedRankings.map((ranking, i) => (
-                  <tr key={ranking.team_id}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <img 
-                        src={ranking.team.logo} 
-                        alt={ranking.team.name}
-                        style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
-                      />
-                      {ranking.team.name}
-                    </td>
-                    <td>{ranking.points_for}</td>
-                    <td>{ranking.points_against}</td>
-                    <td>{ranking.percentage ? Number(ranking.percentage).toFixed(2) : '—'}</td>
-                    <td>{ranking.elo}</td>
-                    <td>{4}</td>
-                  </tr>
+                enrichedRankings
+                  .sort((a, b) => b.points - a.points)
+                  .map((ranking, i) => (
+                    <tr key={ranking.team_id}>
+                      <td>{i + 1}</td>
+                      <td>
+                        <img 
+                          src={ranking.team.logo} 
+                          alt={ranking.team.name}
+                          style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
+                        />
+                        {ranking.team.name}
+                      </td>
+                      <td>{ranking.played}</td>
+                      <td>{ranking.points}</td>
+                      <td>{ranking.percentage ? Number(ranking.percentage).toFixed(2) : '—'}</td>
+                      <td>{ranking.wins}</td>
+                      <td>{ranking.losses}</td>
+                      <td>{ranking.draws}</td>
+                      <td>{ranking.points_for}</td>
+                      <td>{ranking.points_against}</td>
+                      <td>{ranking.elo}</td>
+                      <td>{ranking.win_streak}</td>
+                    </tr>
                 ))
               )}
             </tbody>
