@@ -16,6 +16,8 @@ export default function Navbar() {
           <Link to="/stats" className="nav-link">Stats</Link>
           <span className="divider">|</span>
           <Link to="/predictions" className="nav-link">Predictions</Link>
+          <span className="divider">|</span>
+          <Link to="/history" className="nav-link">History</Link>
         </div>
       </div>
 
