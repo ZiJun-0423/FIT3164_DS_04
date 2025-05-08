@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy import UniqueConstraint, ForeignKey, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, relationship
+import bcrypt
 class Base(DeclarativeBase):
     pass
 
@@ -121,3 +122,21 @@ class EloRatings(Base):
     
     def __repr__(self):
         return f"<EloRating(id={self.id}, team_id={self.team_id}, match_id={self.match_id}, rating_before={self.rating_before}, rating_after={self.rating_after})>"
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password_hash = Column(String(128), nullable=False)
+
+    def set_password(self, password):
+        # Hash the password using bcrypt
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    # Method to check the password
+    def check_password(self, password):
+        # Check if the provided password matches the stored hash
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+    
+    def __repr__(self):
+        return f"<User(id={self.id}, username={self.username})>"

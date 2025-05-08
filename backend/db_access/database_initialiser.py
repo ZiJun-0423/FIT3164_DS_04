@@ -1,13 +1,14 @@
 import os
 from datetime import datetime
+import dotenv
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.db_access.schema import Base, Team, Match, MatchStats
-from backend.models.elo_db_stored import calculate_elo_static
+from backend.db_access.schema import Base, Team, Match, MatchStats, User
+from backend.models.elo_formula import calculate_elo
 from backend.db_access.db_match import db_get_all_matches
 from backend.db_access.db_base import get_db_session
-import dotenv
+
 
 
 dotenv.load_dotenv()
@@ -203,7 +204,7 @@ with Session() as session:
     print(f"{len(match_stats_to_add)} match stats added successfully!")
     
     matches = db_get_all_matches()
-    elo_ratings = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
+    elo_ratings = calculate_elo(matches, k_value=20, initial_elo=1000, home_advantage=100)
     session = get_db_session()
     session.bulk_save_objects(elo_ratings)
     session.commit()
