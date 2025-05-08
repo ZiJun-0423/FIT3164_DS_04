@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import StatsPage from "./pages/StatsPage";
 import PredictionsPage from "./pages/PredictionsPage";
+import HistoryPage from "./pages/HistoryPage";
 import TeamPage from "./pages/Teampage";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,19 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/predictions" element={<PredictionsPage />} />
           <Route path="/stats/:id" element={<TeamPage />} />
+          <Route
+            path="/history"
+            element={
+              <HistoryPage
+                teamsWithLogos={[]} // <-- must be an array
+                enrichedMatches={[]}
+                recentMatchCount={5}
+                setRecentMatchCount={() => {}}
+                selectedTeamId=""
+                setSelectedTeamId={() => {}}
+              />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
