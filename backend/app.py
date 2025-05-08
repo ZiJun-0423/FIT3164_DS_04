@@ -9,7 +9,7 @@ from backend.api.elo_routes import elo_bp
 # from backend.api.user_routes import user_bp
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
 # register blueprints for different routes
 app.register_blueprint(teams_bp, url_prefix="/teams")
