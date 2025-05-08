@@ -1,12 +1,11 @@
-from backend.db_access.schema import EloRatings
 import math
-def calculate_elo_static(
+from backend.db_access.schema import EloRatings
+
+def calculate_elo(
     matches,
     k_value=20,
     initial_elo=1000,
-    home_advantage=100,
-    previous_season_weightage=0.75,
-    new_team_default=1000
+    home_advantage=100
 ):
     """
     Static ELO calculation based on match history.
@@ -94,7 +93,7 @@ if __name__ == "__main__":
     from backend.db_access.db_match import db_get_all_matches
     matches = db_get_all_matches()
     
-    elo_ratings = calculate_elo_static(matches, k_value=20, initial_elo=1000, home_advantage=100)
+    elo_ratings = calculate_elo(matches, k_value=20, initial_elo=1000, home_advantage=100)
     from backend.db_access.db_base import get_db_session
     session = get_db_session()
     session.bulk_save_objects(elo_ratings)

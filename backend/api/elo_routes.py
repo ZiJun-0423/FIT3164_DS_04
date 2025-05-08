@@ -1,37 +1,80 @@
 from flask import Blueprint, jsonify, request
-import backend.db_access.db_elo as db_elo
-from backend.models.elo_db_stored import calculate_elo_static
+from sqlalchemy import extract
+# import backend.db_access.db_elo as db_elo
+from backend.models.elo_formula import calculate_elo
+from backend.db_access.db_base import get_db_session
+from backend.db_access.schema import EloRatings, Team, Match, MatchStats
+from sqlalchemy.exc import SQLAlchemyError
 elo_bp = Blueprint("elo", __name__, url_prefix="/elo")
 
 @elo_bp.route("/", methods=["GET"])
 def get_all_elo():
     """API route to get all ELO ratings."""
-    elo_ratings = db_elo.db_get_all_elo()
-    if isinstance(elo_ratings, dict) and "error" in elo_ratings:
-        return jsonify({"error": elo_ratings["error"]}), 500
-    return jsonify([{"date": rating.date, "team_id": rating.team_id, "rating": rating.rating_after} for rating in elo_ratings]), 200
-
+    session = get_db_session()
+    try:
+        elo_ratings = (session
+            .query(EloRatings)
+            .order_by(EloRatings.date.desc())
+            .all())
+        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+    except SQLAlchemyError as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({"error": "Unexpected server error"}), 500
+    finally:
+        session.close()
+        
 @elo_bp.route("/filter_by_team_id/<int:team_id>", methods=["GET"])
 def get_elo_by_team_id(team_id):
     """API route to get ELO ratings by team ID."""
-    elo_ratings = db_elo.db_get_elo_by_team_id(team_id)
-    if isinstance(elo_ratings, dict) and "error" in elo_ratings:
-        return jsonify({"error": elo_ratings["error"]}), 500
-    return jsonify([{"date": rating.date, "team_id": rating.team_id, "rating": rating.rating_after} for rating in elo_ratings]), 200
+    session = get_db_session()
+    try:
+        elo_ratings = (session
+            .query(EloRatings)
+            .filter(EloRatings.team_id == team_id)
+            .order_by(EloRatings.date.desc())
+            .all()
+        )
+        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+    except SQLAlchemyError as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({"error": "Unexpected server error"}), 500
+    finally:
+        session.close()
 
-@elo_bp.route("/force_update_on_user", methods=["POST"])
-def force_update_db_elo():
-    """API route to force update ELO ratings in the database on user settings."""
-    data = request.get_json()
-    if not data or "matches" not in data:
-        return jsonify({"error": "Invalid input"}), 400
-
-    matches = data["matches"]
-    k_value = data.get("k_value", 20)
-    initial_elo = data.get("initial_elo", 1000)
-    home_advantage = data.get("home_advantage", 100)
-
-    elo_ratings = calculate_elo_static(matches, k_value, initial_elo, home_advantage)
-
-    db_elo.db_create_elo_rating(elo_ratings)
-    return jsonify({"message": "ELO ratings updated successfully"}), 200
+@elo_bp.route("/dynamic", methods=["POST"])
+def get_dynamic_elo():
+    """API route to get dynamic ELO ratings.
+    """
+    settings = request.get_json()
+    session = get_db_session()
+    if not settings:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+    try:
+        try:
+            k_value = settings.get("k_value", 20)
+            initial_elo = settings.get("initial_elo", 1000)
+            start_season = settings.get("start_season", 0)
+            home_advantage = settings.get("home_adv",100)
+        except KeyError as e:
+            return jsonify({"error": f"Missing setting: {e}"}), 400
+        
+        matches = (session.query(Match)
+                   .filter(extract('year', Match.date) >= start_season)
+                   .all())
+        elo_ratings = calculate_elo(matches, k_value, initial_elo, home_advantage)
+        
+        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+    except SQLAlchemyError as e:
+        print(f"Database error: {e}")
+        return jsonify({"error": "Database error occurred"}), 500
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({"error": "Unexpected server error"}), 500
+    finally:
+        session.close()
