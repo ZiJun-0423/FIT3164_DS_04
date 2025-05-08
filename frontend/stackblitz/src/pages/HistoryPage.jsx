@@ -32,6 +32,8 @@ export default function HistoryPage() {
     }, {});
   }, [teams]);
 
+  console.log('teamMap', teamMap);
+
   // Enrich match data with team info
   const enrichedMatches = useMemo(() => {
     if (!allMatches || !Object.keys(teamMap).length) return [];
