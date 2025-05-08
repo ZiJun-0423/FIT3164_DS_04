@@ -13,19 +13,31 @@
   --btn-text:          #ffffff;
 }
 
-[data-theme='dark'] {
+body[data-theme='dark'] {
   --bg-gradient-start: #121212;
   --bg-gradient-end:   #1e1e1e;
   --text-color:        #ffffff;
   --card-bg:           #2c2c2c;
   --card-text:         #ffffff;
-  --border-color:      #333333;
+  --border-color:      #00bfa6;
   --highlight-color:   #00bfa6;
   --select-bg:         #1e1e1e;
   --select-text:       #ffffff;
   --btn-bg:            #00bfa6;
   --btn-bg-hover:      #00a58a;
   --btn-text:          #ffffff;
+}
+
+select {
+  background-color: var(--select-bg);
+  color: var(--select-text);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.recent-matches-label {
+  padding-left: 1.5rem;
 }
 
 /* Container */
@@ -61,12 +73,13 @@
 /* Quick Team Jump */
 .team-search-section {
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 1.5rem;
   text-align: left;
 }
 .team-search-section label {
   font-weight: bold;
   margin-right: 0.5rem;
+  margin-bottom: 1 rem;
 }
 .team-search-section select {
   padding: 0.5rem 0.75rem;
@@ -140,9 +153,16 @@
   margin-bottom: 1rem;
 }
 .recent-grid {
+  gap: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+}
+
+.auto-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.fixed-grid {
+  grid-template-columns: repeat(5, 1fr);
 }
 .recent-card {
   background: var(--card-bg);
@@ -270,6 +290,11 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+.date-picker{
+  padding-left: 1.5rem;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -284,5 +309,17 @@
   }
   .elo-card {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-search-section {
+    margin: 1rem; /* Reduce margin on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .team-search-section {
+    margin: 0.5rem; /* Further reduce margin on very small screens */
   }
 }

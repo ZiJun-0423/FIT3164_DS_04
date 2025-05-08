@@ -14,7 +14,7 @@ const makeLogo = name =>
 
 export default function HomePage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
-  const [showElo, setShowElo]               = useState(false);
+  const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
 
   const {
@@ -134,7 +134,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="hero-section">
         <h1 className="hero-title">
-          Track AFL Team Rankings in Real Time!
+          Track AFL Team Rankings in All Time!
         </h1>
         <p className="hero-subtitle">
           Get live ELO ratings, match predictions, and team insights!
@@ -156,7 +156,7 @@ export default function HomePage() {
         </select>
         {renderTeamCard()}
       </section>
-      <label>
+      <label className="recent-matches-label">
       Show recent matches:&nbsp;
       <select
         value={recentMatchCount}
@@ -165,7 +165,7 @@ export default function HomePage() {
         <option value={3}>3</option>
         <option value={5}>5</option>
         <option value={10}>10</option>
-        <option value={20}>20</option>
+
       </select>
       </label>
       {/* Recent Matches */}

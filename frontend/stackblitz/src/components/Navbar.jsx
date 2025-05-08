@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="nav-left">
         <Link to="/">
-          <img src="/afllogo.svg" alt="AFL Logo" className="logo" style={{ padding: "0px 32px 0px 20px"}}/>
+          <img src="/afllogo.svg" alt="AFL Logo" className="logo" style={{ padding: "0px 32px 0px 20px"}} />
         </Link>
 
         <div className="nav-links">
@@ -16,8 +16,11 @@ export default function Navbar() {
           <Link to="/stats" className="nav-link">Stats</Link>
           <span className="divider">|</span>
           <Link to="/predictions" className="nav-link">Predictions</Link>
-          <ThemeToggle />
         </div>
+      </div>
+
+      <div className="nav-right">
+        <ThemeToggle />
       </div>
     </nav>
   );
