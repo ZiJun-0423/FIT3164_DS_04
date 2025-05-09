@@ -1,11 +1,18 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy import UniqueConstraint, ForeignKey, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, relationship
+from sqlalchemy.inspection import inspect
 import bcrypt
+class AsDictMixin:
+    def to_dict(self):
+        return {
+            c.key: getattr(self, c.key)
+            for c in inspect(self).mapper.column_attrs
+        }
 class Base(DeclarativeBase):
     pass
 
-class Team(Base):
+class Team(Base, AsDictMixin):
     __tablename__ = 'teams'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False, unique=True)
@@ -21,7 +28,7 @@ class Team(Base):
     def __repr__(self):
         return f"<Team(id={self.id}, name={self.name})>"
     
-class Match(Base):
+class Match(Base, AsDictMixin):
     __tablename__ = 'matches'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(DateTime, nullable=False)
@@ -45,7 +52,7 @@ class Match(Base):
     
     def __repr__(self):
         return f"<Match(id={self.id}, date={self.date}, round_num={self.round_num}, team1_id={self.team1_id}, team2_id={self.team2_id})>"
-class MatchStats(Base):
+class MatchStats(Base, AsDictMixin):
     __tablename__ = 'match_stats'
     id = Column(Integer, primary_key=True, autoincrement=True)
     match_id = Column(Integer, ForeignKey('matches.id'),nullable=False)
@@ -103,7 +110,7 @@ class MatchStats(Base):
     
     def __repr__(self):
         return f"<MatchStats(id={self.id}, match_id={self.match_id}, team_id={self.team_id})>"
-class EloRatings(Base):
+class EloRatings(Base, AsDictMixin):
     __tablename__ = 'elo_ratings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     date = Column(DateTime, nullable=False)
@@ -123,7 +130,7 @@ class EloRatings(Base):
     def __repr__(self):
         return f"<EloRating(id={self.id}, team_id={self.team_id}, match_id={self.match_id}, rating_before={self.rating_before}, rating_after={self.rating_after})>"
 
-class User(Base):
+class User(Base, AsDictMixin):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)

@@ -74,9 +74,9 @@ with Session() as session:
         home_venue = home_venue_map.get(team, None)
         existing_team = session.query(Team).filter_by(name=team).first()
         if not existing_team:
-                new_team = Team(name=team, home_venue=home_venue)
-                session.add(new_team)
-    session.commit()
+            new_team = Team(name=team, home_venue=home_venue)
+            session.add(new_team)
+            session.commit()
     print(f"{len(unique_teams)} teams added successfully!")
 
 #input match data into database
@@ -118,8 +118,14 @@ merged_df = merged_df.where(pd.notna(merged_df), None)
 with Session() as session:
     match_stats_to_add = []
     for _, row in merged_df.iterrows():
+        match = session.query(Match).filter_by(
+            date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M'),
+            round_num=row['round'],
+            team1_id=team_name_to_id[row['team1']],
+            team2_id=team_name_to_id[row['team2']]
+        ).first()
         match_stats = MatchStats(
-            match_id=session.query(Match).filter_by(date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M')).first().id,
+            match_id=match.id,
             team_id=team_name_to_id[row['team1']],
             q1_goals=row['team1_q1_goals'],
             q2_goals=row['team1_q2_goals'],
@@ -160,7 +166,7 @@ with Session() as session:
 
         # Add stats for team 2
         match_stats = MatchStats(
-            match_id=session.query(Match).filter_by(date=datetime.strptime(row['date'], '%d/%m/%Y %H:%M')).first().id,
+            match_id=match.id,
             team_id=team_name_to_id[row['team2']],
             q1_goals=row['team2_q1_goals'],
             q2_goals=row['team2_q2_goals'],
