@@ -9,9 +9,14 @@ from backend.models.elo_formula import calculate_elo
 from backend.db_access.db_match import db_get_all_matches
 from backend.db_access.db_base import get_db_session
 
-
-
 dotenv.load_dotenv()
+
+print("DB_USER:", os.getenv('DB_USER'))
+print("DB_PASSWORD:", os.getenv('DB_PASSWORD'))
+print("DB_ENDPOINT:", os.getenv('DB_ENDPOINT'))
+print("DB_PORT:", os.getenv('DB_PORT'))  # <-- likely the culprit
+print("DB_NAME:", os.getenv('DB_NAME'))
+
 DB_URL = 'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}'.format(
     user=os.getenv('DB_USER'),
     password=os.getenv('DB_PASSWORD'),
