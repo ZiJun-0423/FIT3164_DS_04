@@ -1,9 +1,14 @@
 import jwt
 import os, dotenv
 import datetime
+from functools import wraps
 from flask import Blueprint, request, jsonify
 from backend.db_access.db_base import get_db_session
 from backend.db_access.schema import User
+
+dotenv.load_dotenv()
+SECRET_KEY = os.getenv("secret_key")
+        
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
@@ -34,8 +39,6 @@ def login():
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
-    dotenv.load_dotenv()
-    SECRET_KEY = os.getenv("secret_key")
     
     user = session.query(User).filter_by(username=username).first()
 
@@ -50,15 +53,14 @@ def login():
     return jsonify({"token": token}), 200
 
 def token_required(f):
+    @wraps(f)
     def wrapper(*args, **kwargs):
-        dotenv.load_dotenv()
-        SECRET_KEY = os.getenv("secret_key")
         token = request.headers.get("Authorization")
         if not token:
             return jsonify({"error": "Token missing"}), 401
         try:
             decoded = jwt.decode(token.replace("Bearer ", ""), SECRET_KEY, algorithms=["HS256"])
-            request.user = decoded["user"]
+            request.user_id = decoded["user_id"]
         except jwt.ExpiredSignatureError:
             return jsonify({"error": "Token expired"}), 403
         except jwt.InvalidTokenError:
