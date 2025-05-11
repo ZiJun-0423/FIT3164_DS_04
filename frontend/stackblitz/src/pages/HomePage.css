@@ -323,3 +323,17 @@ select {
     margin: 0.5rem; /* Further reduce margin on very small screens */
   }
 }
+.win-history {
+  font-family: 'Roboto Mono', monospace;
+  letter-spacing: 5px;
+}
+
+.win-history .win {
+  color: green;
+  font-weight: bold;
+}
+
+.win-history .loss {
+  color: red;
+  font-weight: bold;
+}

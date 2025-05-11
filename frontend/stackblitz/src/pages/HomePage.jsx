@@ -72,12 +72,32 @@ export default function HomePage() {
   }, [enrichedMatches, recentMatchCount]);
 
   const enrichedRankings = useMemo(() => {
-    if (!Rankings || !teamsWithLogos.length) return [];
-    return Rankings.map(team => ({
-      ...team,
-      team: teamsWithLogos.find(t => t.id === team.team_id)
-    }));
-  }, [Rankings, teamsWithLogos]);
+    if (!Rankings || !teamsWithLogos.length || !allMatches) return [];
+  
+    return Rankings.map(team => {
+      const teamMatches = allMatches
+        .filter(
+          match =>
+            match.team1_id === team.team_id || match.team2_id === team.team_id
+        )
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 9); // ✅ most recent 9 matches
+  
+      const winHistory = teamMatches.map(match => {
+        const isHome = match.team1_id === team.team_id;
+        const teamScore = isHome ? match.team1_score : match.team2_score;
+        const oppScore = isHome ? match.team2_score : match.team1_score;
+        return teamScore > oppScore ? "W" : "L";
+      });
+  
+      return {
+        ...team,
+        team: teamsWithLogos.find(t => t.id === team.team_id),
+        winHistory,
+      };
+    });
+  }, [Rankings, teamsWithLogos, allMatches]);
+  
 
 //   console.log('selectedDate', selectedDate);
 //   console.log('recent', recentMatches);
@@ -231,7 +251,7 @@ export default function HomePage() {
                 <th>PF</th>
                 <th>PA</th>
                 <th>ELO Score</th>
-                <th>Win Streak</th>
+                <th>Win Streaks</th>
               </tr>
             </thead>
             <tbody>
@@ -266,7 +286,15 @@ export default function HomePage() {
                       <td>{ranking.points_for}</td>
                       <td>{ranking.points_against}</td>
                       <td>{ranking.elo}</td>
-                      <td>{ranking.win_streak}</td>
+                      <td className="win-history">
+                        {ranking.winHistory
+                          ? ranking.winHistory.map((r, idx) => (
+                              <span key={idx} className={r === 'W' ? 'win' : 'loss'}>
+                                {r}
+                              </span>
+                            ))
+                          : '-'}
+                      </td>
                     </tr>
                 ))
               )}
