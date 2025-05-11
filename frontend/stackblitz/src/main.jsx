@@ -7,6 +7,7 @@ import StatsPage from "./pages/StatsPage";
 import PredictionsPage from "./pages/PredictionsPage";
 import HistoryPage from "./pages/HistoryPage";
 import TeamPage from "./pages/Teampage";
+import DataVisPage from "./pages/DataVisPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               />
             }
           />
+          <Route path="/datavis" element={<DataVisPage />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
