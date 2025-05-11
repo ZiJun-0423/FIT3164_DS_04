@@ -6,7 +6,7 @@ import MiniDateSelector from '../components/DatePicker';
 import './HomePage.css';
 import {API} from '../config.js'
 import { useQuery } from '@tanstack/react-query';
-import { fetchAllMatches, fetchAllTeams,fetchTeamRankings } from '../services/api.js';
+import { fetchAllMatches, fetchAllTeams, fetchTeamRankings } from '../services/api.js';
 
 // helper: normalize team name → logo filename
 const makeLogo = name =>
@@ -81,7 +81,7 @@ export default function HomePage() {
             match.team1_id === team.team_id || match.team2_id === team.team_id
         )
         .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 9); // ✅ most recent 9 matches
+        .slice(0, 9); // most recent 9 matches
   
       const winHistory = teamMatches.map(match => {
         const isHome = match.team1_id === team.team_id;
