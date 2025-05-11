@@ -48,7 +48,3 @@ with session as session:
     
 result = query.all()
 df = pd.DataFrame(result, columns=[col['name'] for col in query.column_descriptions])
-# Convert the DataFrame to a CSV file
-df.to_csv("match_data.csv", index=False)
-print("Data saved to match_data.csv")
-# print(df.head())
