@@ -59,7 +59,7 @@ def get_dynamic_elo():
         try:
             k_value = settings.get("k_value", 20)
             initial_elo = settings.get("initial_elo", 1000)
-            start_season = settings.get("start_season", 0)
+            start_season = settings.get("start_season", 2005)
             home_advantage = settings.get("home_adv",100)
         except KeyError as e:
             return jsonify({"error": f"Missing setting: {e}"}), 400
