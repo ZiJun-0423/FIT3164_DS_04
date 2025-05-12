@@ -3,90 +3,136 @@ import Navbar from "../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { fetchAllTeams, fetchAllMatches } from "../services/api"; // adjust path if needed
-import makeLogo from "../components/util";
+// import makeLogo from "../components/util";
+
+const makeLogo = name =>
+  `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
+
 
 export default function HistoryPage() {
+  const [selectedTeamId, setSelectedTeamId] = useState('');
+  const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
-  const [selectedTeamId, setSelectedTeamId] = useState("");
 
-  // Fetch teams
   const {
     data: teams,
     isLoading: loadingTeams,
     isError: errorTeams,
-  } = useQuery({ queryKey: ["teams"], queryFn: fetchAllTeams });
+    } = useQuery({ queryKey: ['teams'], queryFn: fetchAllTeams });
 
-  // Fetch matches
   const {
     data: allMatches,
     isLoading: loadingMatches,
     isError: errorMatches,
-  } = useQuery({ queryKey: ["allMatches"], queryFn: fetchAllMatches });
+    } = useQuery({ queryKey: ['allMatches'], queryFn: fetchAllMatches });
 
-  // Map team IDs to team objects with logos
-  const teamMap = useMemo(() => {
-    if (!teams) return {};
-    return teams.reduce((acc, team) => {
-      acc[team.id] = { ...team, logo: makeLogo(team.name) };
-      return acc;
-    }, {});
+  const latestMatchDate = useMemo(() => {
+    return allMatches?.length
+      ? new Date(Math.max(...allMatches.map(m => new Date(m.date))))
+      : new Date(); // fallback
+  }, [allMatches]);
+
+  const [selectedDate, setSelectedDate] = useState(latestMatchDate);
+
+  const {
+    data: Rankings,
+    isLoading: loadingRankings,
+    isError: errorRankings,
+  } = useQuery({queryKey: ['rankings'], queryFn: () => fetchTeamRankings(selectedDate.toISOString().split('T')[0]), enabled:!! selectedDate});
+
+  const teamsWithLogos = useMemo(() => {
+    if (!teams) return [];
+    return teams.map(team => ({
+      ...team,
+      logo: makeLogo(team.name),
+    }));
   }, [teams]);
 
-  console.log('teamMap', teamMap);
-
-  // Enrich match data with team info
   const enrichedMatches = useMemo(() => {
-    if (!allMatches || !Object.keys(teamMap).length) return [];
+    if (!allMatches || !teamsWithLogos.length) return [];
   
-    return allMatches
-      .map(match => {
-        const home = teamMap[match["team1 id"]];
-        const away = teamMap[match["team2 id"]];
-        if (!home || !away) return null;
-  
-        return {
-          ...match,
-          dateObj: new Date(match.date),
-          home,
-          away
-        };
-      })
-      .filter(Boolean); // remove nulls
-  }, [allMatches, teamMap]);
+    return allMatches.map(match => ({
+      ...match,
+      dateObj: new Date(match.date+ '+10:00'),
+      home: teamsWithLogos.find(t => t.id === match['team1_id']),
+      away: teamsWithLogos.find(t => t.id === match['team2_id']),
+    }));
+  }, [allMatches, teamsWithLogos]);
 
-  // Team info card
+  const recentMatches = useMemo(() => {
+    if (!enrichedMatches.length) return [];
+    
+    // Sort by date descending and take the 5 most recent
+    return [...enrichedMatches]
+      .sort((a, b) => b.dateObj - a.dateObj)
+      .slice(0, recentMatchCount);
+  }, [enrichedMatches, recentMatchCount]);
+
+  const enrichedRankings = useMemo(() => {
+    if (!Rankings || !teamsWithLogos.length || !allMatches) return [];
+  
+    return Rankings.map(team => {
+      const teamMatches = allMatches
+        .filter(
+          match =>
+            match.team1_id === team.team_id || match.team2_id === team.team_id
+        )
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 9); // most recent 9 matches
+  
+      const winHistory = teamMatches.map(match => {
+        const isHome = match.team1_id === team.team_id;
+        const teamScore = isHome ? match.team1_score : match.team2_score;
+        const oppScore = isHome ? match.team2_score : match.team1_score;
+        return teamScore > oppScore ? "W" : "L";
+      });
+  
+      return {
+        ...team,
+        team: teamsWithLogos.find(t => t.id === team.team_id),
+        winHistory,
+      };
+    });
+  }, [Rankings, teamsWithLogos, allMatches]);
+  
+
+//   console.log('selectedDate', selectedDate);
+//   console.log('recent', recentMatches);
+//   if (loadingTeams || loadingMatches) return <div>Loading...</div>;
+//   if (errorTeams || errorMatches) return <div>Error loading data.</div>;
+
+  // render selected team's info card
   const renderTeamCard = () => {
     if (!selectedTeamId) return null;
-    const id = +selectedTeamId;
-    const team = teamMap[id];
-    if (!team) return null;
-
+    const id = +selectedTeamId;``
+    const team = teamsWithLogos.find(t => t.id === id);
     const results = enrichedMatches
-      .filter((m) => m["team1 id"] === id || m["team2 id"] === id)
-      .sort((a, b) => b.dateObj - a.dateObj)
+      .filter(m => m.team1_id === id || m.team2_id === id)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 5);
 
     return (
       <div className="team-info-card card-box">
+        {/* header row */}
         <div className="team-header">
           <span className="team-name">{team.name}</span>
           <span className="elo-score">ELO Score: —</span>
           <span className="last3-label">Last 5 Results:</span>
         </div>
         <ul className="team-results">
-          {results.map((m) => {
-            const date = m.dateObj.toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
+          {results.map(m => {
+            const home = teamsWithLogos.find(t => t.id === m.team1_id);
+            const away = teamsWithLogos.find(t => t.id === m.team2_id);
+            const date = new Date(m.date).toLocaleDateString(undefined, {
+              month: 'short', day: 'numeric', year: 'numeric'
             });
             return (
               <li key={m.id} className="match-result">
                 <strong>{date}</strong> :&nbsp;
-                <img src={m.home.logo} alt={m.home.name} className="team-logo" />
-                {m.home.name} {m.team1_score}–{m.team2_score}
-                <img src={m.away.logo} alt={m.away.name} className="team-logo" />
-                {m.away.name}
+                <img src={home.logo} alt={home.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {home.name} {m.team1_score}–{m.team2_score}
+                <img src={away.logo} alt={away.name} className="team-logo" style={{ height: '40px', width: '40px', objectFit: 'contain' }}/>
+                {away.name}
               </li>
             );
           })}
@@ -106,7 +152,7 @@ export default function HistoryPage() {
     <div className="home-container">
         <Navbar />
         <div className="history-page-container">
-        {/* Jump to Team Dropdown */}
+        {/* Jump to Team Dropdown
         <section className="team-search-section">
             <label htmlFor="team-select">Jump to team:</label>
             <select
@@ -122,7 +168,7 @@ export default function HistoryPage() {
             ))}
             </select>
             {renderTeamCard()}
-        </section>
+        </section> */}
 
         {/* Show Recent Matches Dropdown */}
         <label className="recent-matches-label">

@@ -12,8 +12,8 @@ export default function Navbar() {
 
         <div className="nav-links">
           <Link to="/" className="nav-link">Home</Link>
-          <span className="divider">|</span>
-          <Link to="/stats" className="nav-link">Stats</Link>
+          {/* <span className="divider">|</span>
+          <Link to="/stats" className="nav-link">Stats</Link> */}
           <span className="divider">|</span>
           <Link to="/predictions" className="nav-link">Predictions</Link>
           <span className="divider">|</span>

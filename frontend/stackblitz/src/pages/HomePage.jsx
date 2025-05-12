@@ -161,7 +161,7 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Quick Team Jump */}
+      {/* Quick Team Jump
       <section className="team-search-section">
         <label htmlFor="team-select">Jump to team:</label>
         <select
@@ -189,7 +189,7 @@ export default function HomePage() {
       </select>
       </label>
       {/* Recent Matches */}
-      <section className="recent-section">
+      {/* <section className="recent-section">
         <h2>Recent Matches</h2>
         <div className="recent-grid">
           {recentMatches.length > 0 ? (
@@ -225,7 +225,7 @@ export default function HomePage() {
             </div>
           )}
         </div>
-      </section>
+      </section> */} 
       {latestMatchDate && (
         <MiniDateSelector
           defaultDate={latestMatchDate}
