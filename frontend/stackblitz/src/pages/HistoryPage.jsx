@@ -130,7 +130,11 @@ export default function HistoryPage() {
     );
   }, [enrichedMatches, selectedTeams]);
 
-  const visibleMatches = filteredMatches.slice(0, visibleCount);
+  const visibleMatches = useMemo(() => {
+    return [...filteredMatches]
+      .sort((a, b) => b.dateObj - a.dateObj)
+      .slice(0, visibleCount);
+  }, [filteredMatches, visibleCount]);
 
   
 
