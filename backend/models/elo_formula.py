@@ -71,15 +71,15 @@ def calculate_elo(
         mov_multiplier = math.log(margin + 1) * (2.2 / ((abs(elo_diff) * 0.001) + 2.2))
             
         # Update ELO ratings
-        team1_elo_after = team1_elo_before + k_value * (actual_team1 - expected_team1) * mov_multiplier
-        team2_elo_after = team2_elo_before + k_value * (actual_team2 - expected_team2)  * mov_multiplier
+        team1_elo_after = team1_elo_adjusted + k_value * (actual_team1 - expected_team1) * mov_multiplier
+        team2_elo_after = team2_elo_adjusted + k_value * (actual_team2 - expected_team2)  * mov_multiplier
 
         # Save to history
         elo_history.append(
-            EloRatings(date=match_date, team_id=team1_id, match_id=match_id, rating_before=team1_elo_before, rating_after=team1_elo_after)
+            EloRatings(date=match_date, team_id=team1_id, match_id=match_id, rating_before=team1_elo_before, rating_after=team1_elo_after, rating_change=team1_elo_after - team1_elo_before)
         )
         elo_history.append(
-            EloRatings(date=match_date, team_id=team2_id, match_id=match_id, rating_before=team2_elo_before, rating_after=team2_elo_after)
+            EloRatings(date=match_date, team_id=team2_id, match_id=match_id, rating_before=team2_elo_before, rating_after=team2_elo_after, rating_change=team2_elo_after - team2_elo_before)
         )
 
         # Update current ratings
