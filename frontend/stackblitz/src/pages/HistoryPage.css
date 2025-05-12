@@ -1,0 +1,28 @@
+.recent-teams {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.score {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); 
+  padding: 0 5px;
+  z-index: 1;
+  letter-spacing: 0.1em;
+}
+
+h1 {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  padding: 2rem 1rem;
+  font-size: 2.5rem;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.recent-matches-label {
+  display: block;        
+  margin-bottom: 1.5rem;   
+}

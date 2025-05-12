@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import './HistoryPage.css';
 import { fetchAllTeams, fetchAllMatches } from "../services/api"; // adjust path if needed
 // import makeLogo from "../components/util";
 
@@ -112,7 +113,7 @@ export default function HistoryPage() {
       .slice(0, 5);
 
     return (
-      <div className="team-info-card card-box">
+      <div className="team-info-card card-box ">
         {/* header row */}
         <div className="team-header">
           <span className="team-name">{team.name}</span>
@@ -170,22 +171,22 @@ export default function HistoryPage() {
             {renderTeamCard()}
         </section> */}
 
-        {/* Show Recent Matches Dropdown */}
-        <label className="recent-matches-label">
-            Show recent matches:&nbsp;
-            <select
-            value={recentMatchCount}
-            onChange={(e) => setRecentMatchCount(parseInt(e.target.value))}
-            >
-            <option value={3}>3</option>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            </select>
-        </label>
-
         {/* Recent Matches Display */}
-        <section className="recent-section">
-            <h2>Recent Matches</h2>
+        <section className="recent-section ">
+            <h1>Recent Matches</h1>
+
+            {/* Show Recent Matches Dropdown */}
+            <label className="recent-matches-label mb-20">
+                Show recent matches:&nbsp;
+                <select
+                value={recentMatchCount}
+                onChange={(e) => setRecentMatchCount(parseInt(e.target.value))}
+                >
+                <option value={3}>3</option>
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                </select>
+            </label>
             <div className="recent-grid">
             {[...enrichedMatches]
                 .sort((a, b) => b.dateObj - a.dateObj)
@@ -207,7 +208,7 @@ export default function HistoryPage() {
                         {m.home.name}
                     </span>
                     <span className="score">
-                        {m.team1_score}–{m.team2_score}
+                        {m.team1_score}&nbsp;–&nbsp;{m.team2_score}
                     </span>
                     <span className="team">
                         <img src={m.away.logo} alt={m.away.name} />
