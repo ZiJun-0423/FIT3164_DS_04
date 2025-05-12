@@ -47,3 +47,28 @@ h1 {
 .show-more-button:hover {
   background-color: #00a58a;
 }
+
+.team-icon-row {
+  display: flex;
+  overflow-x: auto;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 2rem;
+}
+
+.team-icon {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.team-icon.selected {
+  opacity: 1;
+  transform: scale(1.1);
+  border: 2px solid #2563eb;
+  border-radius: 50%;
+  padding: 2px;
+}
