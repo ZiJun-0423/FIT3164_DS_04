@@ -56,7 +56,7 @@ export default function HomePage() {
   
     return allMatches.map(match => ({
       ...match,
-      dateObj: new Date(match.date),
+      dateObj: new Date(match.date+ '+10:00'),
       home: teamsWithLogos.find(t => t.id === match['team1_id']),
       away: teamsWithLogos.find(t => t.id === match['team2_id']),
     }));

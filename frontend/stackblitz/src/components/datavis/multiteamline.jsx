@@ -1,22 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import Plot from 'react-plotly.js';
-import { useDynamicEloQuery, useEnrichedMatches } from '../../services/api_hooks';
+import { useDynamicEloQuery, useEnrichedMatches, useTeamsWithLogos } from '../../services/api_hooks';
 
-export default function SoloTeamEloChart({ team_id, settings }) {
-  const { data: allEloData, eloIsLoading, eloError } = useDynamicEloQuery(settings);
-  const { enrichedMatches, matchIsLoading, matchError } = useEnrichedMatches();
-  const [hoveredMatch, setHoveredMatch] = useState(null)
-  console.log('Elo data:', allEloData);
+export default function MultiTeamEloChart({ settings }) {
+  const { data: allEloData, eloLoading, eloError } = useDynamicEloQuery(settings);
+  const { enrichedMatches, matchLoading, matchError } = useEnrichedMatches();
+  const { teamsWithLogos, teamsLoading, teamsError } = useTeamsWithLogos();
+  const [hoveredMatch, setHoveredMatch] = useState(null);
 
-  const teamEloData = useMemo(() => {
-    if (!allEloData) return [];
-    
-    // Ensure team_id is compared as a number
-    return allEloData.filter((d) => Number(d.team_id) === Number(team_id));
-  }, [allEloData, team_id]);
-    
-  const dates = teamEloData.map((d) => new Date(d.date)); // safely converts to JS Date objects
-  const elos = teamEloData.map((d) => d.rating_after);
+  console.log('hovered data:', hoveredMatch);
 
   const enrichedMatchesWithElo = useMemo(() => {
     if (!enrichedMatches || !allEloData) return [];
@@ -31,35 +23,50 @@ export default function SoloTeamEloChart({ team_id, settings }) {
     });
   }, [enrichedMatches, allEloData]);
 
-  if (eloIsLoading || matchIsLoading) return <p>Loading Elo ratings...</p>;
-  if (eloError || matchError) return <p>Error: {matchError.message}</p>;
+  const groupedData = useMemo(() => {
+    if (!allEloData) return {};
+    return allEloData.reduce((acc, d) => {
+      const team_id = Number(d.team_id);
+      if (!acc[team_id]) acc[team_id] = [];
+      acc[team_id].push(d);
+      return acc;
+    }, {});
+  }, [allEloData]);
+
+  const traces = useMemo(() => {
+    return Object.entries(groupedData).map(([team_id, entries]) => {
+      const sorted = entries.sort((a, b) => new Date(a.date) - new Date(b.date));
+      return {
+        x: sorted.map(d => new Date(d.date)),
+        y: sorted.map(d => d.rating_after),
+        customdata: sorted.map(d => d.match_id),
+        type: 'scatter',
+        mode: 'lines',
+        name: teamsWithLogos.find(team => team.id === Number(team_id))?.name,
+        line: { shape: 'spline' },
+        hoverinfo: 'x+y+name',
+      };
+    });
+  }, [groupedData, teamsWithLogos]);
+  console.log('traces:', traces);
+
+
+  if (eloLoading || matchLoading) return <p>Loading data...</p>;
+  if (matchError) return <p>Error: {matchError.message}</p>;
+  if (eloError) return <p>Error: {matchError.message}</p>;
   
-  if (!dates.length || !elos.length) {
-    return <p>No data available to display</p>;
-  }
+  if (traces.length === 0) return <p>No ELO data available</p>;
   
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <Plot
-        data={[
-          {
-            x: dates,
-            y: elos,
-            type: 'scatter',
-            mode: 'lines+markers',
-            name: `Team ${team_id}`,
-            marker: { color: '#00bfa6' },
-            line: { shape: 'spline' },
-            customdata: teamEloData.map(d => d.match_id),
-            hoverinfo: 'x+y',
-          },
-        ]}
+        data={traces}
         layout={{
-          title: `Elo Over Time - Team ${team_id}`,
+          title: 'ELO Ratings Over Time (All Teams)',
           xaxis: {
             title: 'Date',
-            type: 'date', // Ensure Plotly knows it's a date-based x-axis
-            tickformat: '%b %d, %Y', // Format the date as 'Month Day, Year'
+            type: 'date',
+            tickformat: '%b %d, %Y',
           },
           yaxis: { title: 'Elo Rating' },
           autosize: true,
@@ -81,21 +88,22 @@ export default function SoloTeamEloChart({ team_id, settings }) {
         }}
         onUnhover={() => setHoveredMatch(null)}
       />
+
       {hoveredMatch && (
         <div
-          className="match-card"
-          style={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            zIndex: 1000,
-            background: '#222',
-            color: '#fff',
-            padding: '1rem',
-            borderRadius: '10px',
-            boxShadow: '0 0 10px rgba(0,0,0,0.5)'
-          }}
-        >
+        className="match-card"
+        style={{
+          position: 'absolute',
+          top: 20,
+          left: 20,
+          zIndex: 1000,
+          background: '#222',
+          color: '#fff',
+          padding: '1rem',
+          borderRadius: '10px',
+          boxShadow: '0 0 10px rgba(0,0,0,0.5)'
+        }}
+      >
           <h4>
             {new Date(hoveredMatch.dateObj).toLocaleString('en-AU', {
               day: '2-digit',
@@ -111,10 +119,11 @@ export default function SoloTeamEloChart({ team_id, settings }) {
             <div style={{ textAlign: 'center' }}>
               <img src={hoveredMatch.home.logo} alt={hoveredMatch.home.name} height={40} width={40} />
               <div>{hoveredMatch.home.name}</div>
-              <div> Score: {hoveredMatch.team1_score} </div>
+              <div>Score: {hoveredMatch.team1_score}</div>
               <div>ELO: {hoveredMatch.homeElo?.rating_after ?? 'N/A'}</div>
               <div style={{ color: hoveredMatch.homeElo?.rating_change > 0 ? 'green' : 'red' }}>
-              {hoveredMatch.homeElo?.rating_change > 0 ? '▲' : '▼'} {Math.abs(hoveredMatch.homeElo?.rating_change ?? 0).toFixed(1)}
+                {hoveredMatch.homeElo?.rating_change > 0 ? '▲' : '▼'}{' '}
+                {Math.abs(hoveredMatch.homeElo?.rating_change ?? 0).toFixed(1)}
               </div>
             </div>
 
@@ -124,10 +133,11 @@ export default function SoloTeamEloChart({ team_id, settings }) {
             <div style={{ textAlign: 'center' }}>
               <img src={hoveredMatch.away.logo} alt={hoveredMatch.away.name} height={40} width={40} />
               <div>{hoveredMatch.away.name}</div>
-              <div> Score: {hoveredMatch.team2_score} </div>
+              <div>Score: {hoveredMatch.team2_score}</div>
               <div>ELO: {hoveredMatch.awayElo?.rating_after ?? 'N/A'}</div>
               <div style={{ color: hoveredMatch.awayElo?.rating_change > 0 ? 'green' : 'red' }}>
-              {hoveredMatch.awayElo?.rating_change > 0 ? '▲' : '▼'} {Math.abs(hoveredMatch.awayElo?.rating_change ?? 0).toFixed(1)}
+                {hoveredMatch.awayElo?.rating_change > 0 ? '▲' : '▼'}{' '}
+                {Math.abs(hoveredMatch.awayElo?.rating_change ?? 0).toFixed(1)}
               </div>
             </div>
           </div>

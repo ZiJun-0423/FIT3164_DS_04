@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import EloSettings from '../components/EloSettings'; // Import the EloSettings component
 import SoloTeamEloChart from '../components/datavis/soloteamline'; // Import the SoloTeamEloChart component
+import MultiTeamEloChart from '../components/datavis/multiteamline'; // Import the MultiTeamEloChart component
 
 export default function DataVisPage() {
   const [eloSettings, setEloSettings] = useState({
@@ -27,11 +28,18 @@ export default function DataVisPage() {
         <section className="border p-4 rounded-xl shadow-md bg-white">
           <EloSettings onSettingsChange={handleSettingsChange} /> {/* Pass the settings change handler */}
         </section>
-
-        {/* Additional sections for charts or other features can go here */}
+        
+        {/* //Solo line test
         <section className="border p-4 rounded-xl shadow-md bg-white">
-          <h2 className="text-xl font-semibold mb-2">Solo Elo Chart</h2>
-          <SoloTeamEloChart team_id={17} settings={eloSettings} /> {/* Pass the Elo settings to the chart */}
+            <h2 className="text-xl font-semibold mb-2">Solo Elo Chart</h2>
+            <SoloTeamEloChart team_id={17} settings={eloSettings} /> 
+        </section> */}
+       
+
+        {/* multi line test */}
+        <section className="border p-4 rounded-xl shadow-md bg-white">
+          <h2 className="text-xl font-semibold mb-2">Combined Elo Chart</h2>
+          <MultiTeamEloChart settings={eloSettings} /> {/* Pass the Elo settings to the chart */}
         </section>
       </main>
 
