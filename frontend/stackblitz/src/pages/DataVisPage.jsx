@@ -30,9 +30,11 @@ export default function DataVisPage() {
         <section className="flex gap-6">
           {/* Left: Chart with EloSettings underneath */}
           <div className="flex-1 border p-4 rounded-xl shadow-md w-full space-y-6">
-            <div>
+            <div className="h-[650px] overflow-hidden">
               <h2 className="text-xl font-semibold mb-2">Combined Elo Chart</h2>
-              <MultiTeamEloChart settings={eloSettings} />
+              <div className="h-full overflow-auto">
+                <MultiTeamEloChart settings={eloSettings} />
+              </div>
             </div>
 
             <div className="border-t pt-4">
@@ -40,6 +42,7 @@ export default function DataVisPage() {
               <EloSettings onSettingsChange={handleSettingsChange} eloSettings={eloSettings} />
             </div>
           </div>
+
 
           {/* Right: Prediction Panel */}
           <div className="w-[400px] border p-4 rounded-xl shadow-md">
