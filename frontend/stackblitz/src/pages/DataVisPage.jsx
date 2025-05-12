@@ -13,6 +13,7 @@ export default function DataVisPage() {
     home_adv: 100,
   });
 
+  // Handler to update Elo settings
   const handleSettingsChange = (newSettings) => {
     setEloSettings(newSettings); // Update the Elo settings with the new values
   };
@@ -26,18 +27,26 @@ export default function DataVisPage() {
 
         {/* Elo Settings Section */}
         <section className="border p-4 rounded-xl shadow-md bg-white">
-          <EloSettings onSettingsChange={handleSettingsChange} /> {/* Pass the settings change handler */}
+          <EloSettings onSettingsChange={handleSettingsChange} eloSettings={eloSettings} /> {/* Pass settings and handler */}
         </section>
-        
-        {/* //Solo line test
+
+        {/* Display Current Elo Settings */}
         <section className="border p-4 rounded-xl shadow-md bg-white">
+          <h2 className="text-xl font-semibold mb-2">Current Elo Settings</h2>
+          <p><strong>K-Value:</strong> {eloSettings.k_value}</p>
+          <p><strong>Initial Elo:</strong> {eloSettings.initial_elo}</p>
+          <p><strong>Start Season:</strong> {eloSettings.start_season}</p>
+          <p><strong>Home Advantage:</strong> {eloSettings.home_adv}</p>
+        </section>
+
+        {/* Solo line test (optional, commented out for now) */}
+        {/* <section className="border p-4 rounded-xl shadow-md bg-white">
             <h2 className="text-xl font-semibold mb-2">Solo Elo Chart</h2>
             <SoloTeamEloChart team_id={17} settings={eloSettings} /> 
         </section> */}
-       
 
-        {/* multi line test */}
-        <section className="border p-4 rounded-xl shadow-md bg-white">
+        {/* Multi Team Elo Chart */}
+        <section className="border p-4 rounded-xl shadow-md bg-white relative">
           <h2 className="text-xl font-semibold mb-2">Combined Elo Chart</h2>
           <MultiTeamEloChart settings={eloSettings} /> {/* Pass the Elo settings to the chart */}
         </section>

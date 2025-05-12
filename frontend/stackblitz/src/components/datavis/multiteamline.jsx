@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useDynamicEloQuery, useEnrichedMatches, useTeamsWithLogos } from '../../services/api_hooks';
 
@@ -7,6 +7,8 @@ export default function MultiTeamEloChart({ settings }) {
   const { enrichedMatches, matchLoading, matchError } = useEnrichedMatches();
   const { teamsWithLogos, teamsLoading, teamsError } = useTeamsWithLogos();
   const [hoveredMatch, setHoveredMatch] = useState(null);
+  const [hoverSource, setHoverSource] = useState(null);
+  const chartRef = useRef();
 
   console.log('hovered data:', hoveredMatch);
 
@@ -58,7 +60,10 @@ export default function MultiTeamEloChart({ settings }) {
   if (traces.length === 0) return <p>No ELO data available</p>;
   
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div
+      ref={chartRef}
+      style={{ position: 'relative', width: '100%', height: '100%' }}
+    >
       <Plot
         data={traces}
         layout={{
@@ -84,26 +89,40 @@ export default function MultiTeamEloChart({ settings }) {
         onHover={(event) => {
           const matchId = event.points?.[0]?.customdata;
           const match = enrichedMatchesWithElo.find(m => m.match_id === matchId);
-          setHoveredMatch(match);
+
+          const chartBounds = chartRef.current.getBoundingClientRect();
+          const cursorX = event.event.clientX;
+          const relativeX = cursorX - chartBounds.left;
+          const side = relativeX < chartBounds.width / 2 ? 'left' : 'right';
+
+          if (hoveredMatch?.match_id !== match?.match_id || hoverSource !== side) {
+            setHoveredMatch(match);
+            setHoverSource(side);
+          }
         }}
-        onUnhover={() => setHoveredMatch(null)}
+        onUnhover={() => {
+          setHoveredMatch(null);
+          setHoverSource(null);
+        }}
       />
 
       {hoveredMatch && (
         <div
-        className="match-card"
-        style={{
-          position: 'absolute',
-          top: 20,
-          left: 20,
-          zIndex: 1000,
-          background: '#222',
-          color: '#fff',
-          padding: '1rem',
-          borderRadius: '10px',
-          boxShadow: '0 0 10px rgba(0,0,0,0.5)'
-        }}
-      >
+          className="match-card"
+          style={{
+            pointerEvents: 'none', 
+            position: 'absolute',
+            top: 20,
+            zIndex: 1000,
+            background: '#222',
+            color: '#fff',
+            padding: '1rem',
+            borderRadius: '10px',
+            boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+            maxWidth: '300px',
+            ...(hoverSource === 'left' ? { right: 20 } : { left: 20 }),
+          }}
+        >
           <h4>
             {new Date(hoveredMatch.dateObj).toLocaleString('en-AU', {
               day: '2-digit',
