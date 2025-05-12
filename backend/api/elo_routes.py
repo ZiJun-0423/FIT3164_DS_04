@@ -3,7 +3,7 @@ from sqlalchemy import extract
 # import backend.db_access.db_elo as db_elo
 from backend.models.elo_formula import calculate_elo
 from backend.db_access.db_base import get_db_session
-from backend.db_access.schema import EloRatings, Team, Match, MatchStats
+from backend.db_access.schema import EloRatings, Match
 from sqlalchemy.exc import SQLAlchemyError
 elo_bp = Blueprint("elo", __name__, url_prefix="/elo")
 
@@ -15,8 +15,18 @@ def get_all_elo():
         elo_ratings = (session
             .query(EloRatings)
             .order_by(EloRatings.date.desc())
-            .all())
-        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+            .all()
+        )
+        
+        return jsonify([{
+            "date": rating.date, 
+            "match_id": rating.match_id, 
+            "team_id": rating.team_id, 
+            "rating_after": round(rating.rating_after, 2), 
+            "rating_before": round(rating.rating_before, 2), 
+            "rating_change": round(rating.rating_change, 2)
+        } for rating in elo_ratings]), 200
+        
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error occurred"}), 500
@@ -37,7 +47,15 @@ def get_elo_by_team_id(team_id):
             .order_by(EloRatings.date.desc())
             .all()
         )
-        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+        return jsonify([{
+            "date": rating.date, 
+            "match_id": rating.match_id, 
+            "team_id": rating.team_id, 
+            "rating_after": round(rating.rating_after, 2), 
+            "rating_before": round(rating.rating_before, 2), 
+            "rating_change": round(rating.rating_change, 2)
+        } for rating in elo_ratings]), 200
+        
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error occurred"}), 500
@@ -69,7 +87,15 @@ def get_dynamic_elo():
                    .all())
         elo_ratings = calculate_elo(matches, k_value, initial_elo, home_advantage)
         
-        return jsonify([{"date": rating.date, "match_id": rating.match_id,"team_id": rating.team_id, "rating_after": rating.rating_after, "rating_before": rating.rating_before} for rating in elo_ratings]), 200
+        return jsonify([{
+            "date": rating.date, 
+            "match_id": rating.match_id, 
+            "team_id": rating.team_id, 
+            "rating_after": round(rating.rating_after, 2), 
+            "rating_before": round(rating.rating_before, 2), 
+            "rating_change": round(rating.rating_change, 2)
+        } for rating in elo_ratings]), 200
+        
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
         return jsonify({"error": "Database error occurred"}), 500

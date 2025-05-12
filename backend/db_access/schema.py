@@ -118,6 +118,7 @@ class EloRatings(Base, AsDictMixin):
     match_id = Column(Integer, ForeignKey('matches.id'), nullable=False)
     rating_before = Column(Integer, nullable=False)
     rating_after = Column(Integer, nullable=False)
+    rating_change = Column(Integer, nullable=False)
 
     
     #relationships
@@ -128,7 +129,7 @@ class EloRatings(Base, AsDictMixin):
                       CheckConstraint('rating_after >= 0', name='check_rating_after_positive'))
     
     def __repr__(self):
-        return f"<EloRating(id={self.id}, team_id={self.team_id}, match_id={self.match_id}, rating_before={self.rating_before}, rating_after={self.rating_after})>"
+        return f"<EloRating(id={self.id}, team_id={self.team_id}, match_id={self.match_id}, rating_before={self.rating_before}, rating_after={self.rating_after}, rating_change={self.rating_change})>"
 
 class User(Base, AsDictMixin):
     __tablename__ = 'users'
