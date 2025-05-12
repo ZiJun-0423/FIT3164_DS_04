@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import makeLogo from '../components/util';
 import { API } from '../config';
+
+const makeLogo = name =>
+  `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
 
 async function fetchAllTeams() {
   try {
