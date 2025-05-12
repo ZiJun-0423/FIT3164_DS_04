@@ -315,19 +315,18 @@ export default function HomePage() {
           {showElo && (
             <div className="elo-content">
               <p>
-                The <strong>ELO rating</strong> system was originally devised
-                for chess to measure the relative skill levels of competitors.
-                Each AFL team starts with a base rating (e.g. 1500). After each
-                match, the winner takes points from the loser—the amount depends
-                on the margin of victory and pre-game ratings. Over the season,
-                ELO provides a dynamic, self-correcting measure of who’s hot or
-                in a slump.
-              </p>
-              <p>
-                Wins against stronger opponents yield bigger jumps. Think of it
-                as a real-time ladder that adjusts not just for wins/losses but
-                also for the quality of each victory.
-              </p>
+              The ELO rating is a number that represents a team's strength based on past performance.
+              Every team starts with a base rating of <strong>1000</strong>.
+              After each match, the winner gains points and the loser loses points.
+            </p>
+            <p>
+              The number of points exchanged depends on how strong each team was before the match.
+              Beating a strong opponent increases your rating more than beating a weak one.
+              Over time, ELO helps show which teams are on a hot streak or underperforming.
+            </p>
+            <p>
+              ELO is used in sports, chess, and esports — and here, it helps rank AFL teams more fairly than just win/loss records.
+            </p>
             </div>
           )}
         </div>
