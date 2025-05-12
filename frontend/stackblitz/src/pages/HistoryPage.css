@@ -27,6 +27,10 @@ h1 {
   margin-bottom: 1.5rem;   
 }
 
+.recent-date {
+    text-align: center;
+}
+
 .show-more-button {
   margin: 2rem auto;
   display: block;
