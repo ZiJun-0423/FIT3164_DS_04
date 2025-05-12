@@ -8,6 +8,7 @@ import PredictionsPage from "./pages/PredictionsPage";
 import HistoryPage from "./pages/HistoryPage";
 import TeamPage from "./pages/Teampage";
 import DataVisPage from "./pages/DataVisPage";
+import "./style.css"
 
 const queryClient = new QueryClient();
 
