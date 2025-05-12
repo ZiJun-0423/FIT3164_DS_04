@@ -25,13 +25,12 @@ export default function DataVisPage() {
 
         {/* Elo Settings Section */}
         <section className="border p-4 rounded-xl shadow-md bg-white">
-          <h2 className="text-xl font-semibold mb-2">Elo Settings</h2>
           <EloSettings onSettingsChange={handleSettingsChange} /> {/* Pass the settings change handler */}
         </section>
 
         {/* Additional sections for charts or other features can go here */}
         <section className="border p-4 rounded-xl shadow-md bg-white">
-          <h2 className="text-xl font-semibold mb-2">Elo Chart</h2>
+          <h2 className="text-xl font-semibold mb-2">Solo Elo Chart</h2>
           <SoloTeamEloChart team_id={17} settings={eloSettings} /> {/* Pass the Elo settings to the chart */}
         </section>
       </main>
