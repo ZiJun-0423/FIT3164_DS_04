@@ -15,6 +15,7 @@ export default function HistoryPage() {
   const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
   const [visibleCount, setVisibleCount] = useState(5);
+  const [selectedTeams, setSelectedTeams] = useState([]);
 
   const {
     data: teams,
@@ -99,11 +100,27 @@ export default function HistoryPage() {
   }, [Rankings, teamsWithLogos, allMatches]);
   
 
-//   console.log('selectedDate', selectedDate);
-//   console.log('recent', recentMatches);
+  console.log('teamsWithLogos', teamsWithLogos);
+  // console.log('recent', recentMatches);
 //   if (loadingTeams || loadingMatches) return <div>Loading...</div>;
 //   if (errorTeams || errorMatches) return <div>Error loading data.</div>;
 
+  const toggleTeam = (teamId) => {
+    setSelectedTeams((prev) =>
+      prev.includes(teamId)
+        ? prev.filter((id) => id !== teamId)
+        : [...prev, teamId]
+    );
+  };
+
+  const filteredMatches = enrichedMatches
+  .filter((match) => {
+    if (selectedTeams.length === 0) return true;
+    return (
+      selectedTeams.includes(match.home.id) ||
+      selectedTeams.includes(match.away.id)
+    );
+  });
   // render selected team's info card
   const renderTeamCard = () => {
     if (!selectedTeamId) return null;
@@ -176,11 +193,20 @@ export default function HistoryPage() {
         {/* Recent Matches Display */}
         <section className="recent-section ">
             <h1>Recent Matches</h1>
+            <div className="team-icon-row">
+              {teamsWithLogos.map((team) => (
+                <img
+                  key={team.id}
+                  src={team.logo}
+                  alt={team.name}
+                  className={`team-icon ${selectedTeams.includes(team.id) ? 'selected' : ''}`}
+                  onClick={() => toggleTeam(team.id)}
+                  title={team.name}
+                />
+              ))}
+            </div>
             <div className="recent-grid">
-            {[...enrichedMatches]
-                .sort((a, b) => b.dateObj - a.dateObj)
-                .slice(0, visibleCount)
-                .map((m) => (
+            {filteredMatches.map((m) => (
                 <div className="recent-card" key={m.id}>
                     <p className="recent-date">
                     {m.dateObj.toLocaleDateString(undefined, {
@@ -210,7 +236,7 @@ export default function HistoryPage() {
             {hasMore && (
               <button
                 className="show-more-button"
-                onClick={() => setVisibleCount((prev) => prev + 3)}
+                onClick={() => setVisibleCount((prev) => prev + 10)}
               >
                 Show More Matches
               </button>
