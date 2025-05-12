@@ -1,0 +1,117 @@
+.predictions-page {
+  background: #121212;
+  color: #fff;
+  min-height: 100vh;
+}
+
+.content {
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+}
+
+.select-team-button {
+  padding: 20px 40px;
+  background: #333;
+  color: #fff;
+  border: 2px solid #1e1e1e;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  font-size: 1.2em;
+  border-radius: 8px;
+}
+
+.select-team-button img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.predict-button {
+  padding: 10px 30px;
+  background: #00bfa6;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2em;
+  border-radius: 8px;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #222;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 500px;
+  max-height: 80%;
+  overflow: hidden; /* Remove large scrollbar from the entire modal */
+}
+
+.team-list {
+  list-style-type: none;
+  padding: 0;
+  max-height: 400px; /* Set a maximum height for the list */
+  overflow-y: auto; /* Enable scroll within the team list only */
+}
+
+.team-list li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #555;
+}
+
+.team-list li:hover {
+  background-color: #444;
+}
+
+.team-logo {
+  width: 30px;
+  height: 30px;
+  margin-right: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.close-button {
+  padding: 10px;
+  border: none;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+  background: #ff4e4e;
+  color: white;
+}
+
+.close-button:hover {
+  opacity: 0.8;
+}
