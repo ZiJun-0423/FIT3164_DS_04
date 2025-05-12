@@ -14,6 +14,7 @@ export default function HistoryPage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(5);
 
   const {
     data: teams,
@@ -69,6 +70,7 @@ export default function HistoryPage() {
       .slice(0, recentMatchCount);
   }, [enrichedMatches, recentMatchCount]);
 
+  const hasMore = visibleCount < enrichedMatches.length;
   const enrichedRankings = useMemo(() => {
     if (!Rankings || !teamsWithLogos.length || !allMatches) return [];
   
@@ -174,23 +176,10 @@ export default function HistoryPage() {
         {/* Recent Matches Display */}
         <section className="recent-section ">
             <h1>Recent Matches</h1>
-
-            {/* Show Recent Matches Dropdown */}
-            <label className="recent-matches-label mb-20">
-                Show recent matches:&nbsp;
-                <select
-                value={recentMatchCount}
-                onChange={(e) => setRecentMatchCount(parseInt(e.target.value))}
-                >
-                <option value={3}>3</option>
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                </select>
-            </label>
             <div className="recent-grid">
             {[...enrichedMatches]
                 .sort((a, b) => b.dateObj - a.dateObj)
-                .slice(0, recentMatchCount)
+                .slice(0, visibleCount)
                 .map((m) => (
                 <div className="recent-card" key={m.id}>
                     <p className="recent-date">
@@ -218,6 +207,14 @@ export default function HistoryPage() {
                 </div>
                 ))}
             </div>
+            {hasMore && (
+              <button
+                className="show-more-button"
+                onClick={() => setVisibleCount((prev) => prev + 3)}
+              >
+                Show More Matches
+              </button>
+            )}
         </section>
         </div>
     </div>
