@@ -72,6 +72,8 @@ export default function MultiTeamEloChart({ settings }) {
             title: 'Date',
             type: 'date',
             tickformat: '%b %d, %Y',
+            autosize: true,
+            height: 500, // try this for stability
           },
           yaxis: { title: 'Elo Rating' },
           autosize: true,
@@ -85,7 +87,7 @@ export default function MultiTeamEloChart({ settings }) {
           displayModeBar: true,
           displaylogo: false,
         }}
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%'}}
         onHover={(event) => {
           const matchId = event.points?.[0]?.customdata;
           const match = enrichedMatchesWithElo.find(m => m.match_id === matchId);

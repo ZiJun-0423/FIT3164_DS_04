@@ -4,16 +4,22 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') === 'dark';
-    setIsDark(stored);
-    document.body.setAttribute('data-theme', stored ? 'dark' : 'light');
+    const storedTheme = localStorage.getItem('theme') === 'dark';
+    setIsDark(storedTheme);
+
+    const theme = storedTheme ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', theme);
+    document.body.classList.toggle('dark', storedTheme); // Enable Tailwind dark mode
   }, []);
 
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
-    document.body.setAttribute('data-theme', next ? 'dark' : 'light');
-    localStorage.setItem('theme', next ? 'dark' : 'light');
+
+    const theme = next ? 'dark' : 'light';
+    document.body.setAttribute('data-theme', theme);
+    document.body.classList.toggle('dark', next); // Enable Tailwind dark mode
+    localStorage.setItem('theme', theme);
   };
 
   return (

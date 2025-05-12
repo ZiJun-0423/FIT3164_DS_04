@@ -22,36 +22,33 @@ export default function DataVisPage() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-grow p-6 space-y-10 max-w-6xl mx-auto">
+      <main className="flex-grow p-6 space-y-10 w-full">
+        {/* Title */}
         <h1 className="text-3xl font-bold text-center mb-4">📊 Data Visualization Playground</h1>
 
-        {/* Elo Settings Section */}
-        <section className="border p-4 rounded-xl shadow-md bg-white">
-          <EloSettings onSettingsChange={handleSettingsChange} eloSettings={eloSettings} /> {/* Pass settings and handler */}
-        </section>
+        {/* Elo Chart and Prediction Side-by-Side */}
+        <section className="flex gap-6">
+          {/* Left: Chart with EloSettings underneath */}
+          <div className="flex-1 border p-4 rounded-xl shadow-md w-full space-y-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Combined Elo Chart</h2>
+              <MultiTeamEloChart settings={eloSettings} />
+            </div>
 
-        {/* Display Current Elo Settings */}
-        <section className="border p-4 rounded-xl shadow-md bg-white">
-          <h2 className="text-xl font-semibold mb-2">Current Elo Settings</h2>
-          <p><strong>K-Value:</strong> {eloSettings.k_value}</p>
-          <p><strong>Initial Elo:</strong> {eloSettings.initial_elo}</p>
-          <p><strong>Start Season:</strong> {eloSettings.start_season}</p>
-          <p><strong>Home Advantage:</strong> {eloSettings.home_adv}</p>
-        </section>
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-semibold mb-2">⚙️ Elo Settings</h3>
+              <EloSettings onSettingsChange={handleSettingsChange} eloSettings={eloSettings} />
+            </div>
+          </div>
 
-        {/* Solo line test (optional, commented out for now) */}
-        {/* <section className="border p-4 rounded-xl shadow-md bg-white">
-            <h2 className="text-xl font-semibold mb-2">Solo Elo Chart</h2>
-            <SoloTeamEloChart team_id={17} settings={eloSettings} /> 
-        </section> */}
-
-        {/* Multi Team Elo Chart */}
-        <section className="border p-4 rounded-xl shadow-md bg-white relative">
-          <h2 className="text-xl font-semibold mb-2">Combined Elo Chart</h2>
-          <MultiTeamEloChart settings={eloSettings} /> {/* Pass the Elo settings to the chart */}
+          {/* Right: Prediction Panel */}
+          <div className="w-[400px] border p-4 rounded-xl shadow-md">
+            <h2 className="text-xl font-semibold mb-2">🔮 Match Prediction</h2>
+            <p>Prediction functionality goes here!</p>
+            {/* Add inputs later */}
+          </div>
         </section>
       </main>
-
       <Footer />
     </div>
   );
