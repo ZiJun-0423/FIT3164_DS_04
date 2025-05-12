@@ -156,9 +156,9 @@ export default function HomePage() {
         <h1 className="hero-title">
           Track AFL Team Rankings in All Time!
         </h1>
-        <p className="hero-subtitle">
+        <h2 className="hero-subtitle">
           Get live ELO ratings, match predictions, and team insights!
-        </p>
+        </h2>
       </section>
 
       {/* Quick Team Jump
