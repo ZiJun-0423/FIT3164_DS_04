@@ -1,0 +1,65 @@
+{/* Quick Team Jump
+      <section className="team-search-section">
+        <label htmlFor="team-select">Jump to team:</label>
+        <select
+          id="team-select"
+          value={selectedTeamId}
+          onChange={e => setSelectedTeamId(e.target.value)}
+        >
+          <option value="">Select team…</option>
+          {teamsWithLogos.map(t => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        {renderTeamCard()}
+      </section>
+      <label className="recent-matches-label">
+      Show recent matches:&nbsp;
+      <select
+        value={recentMatchCount}
+        onChange={(e) => setRecentMatchCount(parseInt(e.target.value))}
+      >
+        <option value={3}>3</option>
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+
+      </select>
+      </label>
+      {/* Recent Matches */}
+      {/* <section className="recent-section">
+        <h2>Recent Matches</h2>
+        <div className="recent-grid">
+          {recentMatches.length > 0 ? (
+            recentMatches.map((m, idx) => (
+              <div className="recent-card" key={idx}>
+                <p className="recent-date">
+                  {m.dateObj.toLocaleDateString(undefined, {
+                    weekday: 'short',
+                    day:     'numeric',
+                    month:   'short',
+                    year:    'numeric',
+                  })}{' '}
+                  | Round {m.round_num} @ {m.venue}
+                </p>
+                <div className="recent-teams">
+                  <span className="team">
+                    <img src={m.home.logo} alt={m.home.name} />
+                    {m.home.name}
+                  </span>
+                  <span className="score">
+                    {m.team1_score}–{m.team2_score}
+                  </span>
+                  <span className="team">
+                    <img src={m.away.logo} alt={m.away.name} />
+                    {m.away.name}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="loading-container">
+              <div className="spinner" />
+            </div>
+          )}
+        </div>
+      </section> */}

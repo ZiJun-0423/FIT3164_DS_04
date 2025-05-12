@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useTransition, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -14,8 +14,9 @@ export default function HistoryPage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [showElo, setShowElo]               = useState(true);
   const [recentMatchCount, setRecentMatchCount] = useState(5);
-  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(10);
   const [selectedTeams, setSelectedTeams] = useState([]);
+  const [isPending, startTransition] = useTransition();
 
   const {
     data: teams,
@@ -72,6 +73,7 @@ export default function HistoryPage() {
   }, [enrichedMatches, recentMatchCount]);
 
   const hasMore = visibleCount < enrichedMatches.length;
+  
   const enrichedRankings = useMemo(() => {
     if (!Rankings || !teamsWithLogos.length || !allMatches) return [];
   
@@ -99,28 +101,43 @@ export default function HistoryPage() {
     });
   }, [Rankings, teamsWithLogos, allMatches]);
   
-
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [selectedTeams]);
+  
   console.log('teamsWithLogos', teamsWithLogos);
   // console.log('recent', recentMatches);
 //   if (loadingTeams || loadingMatches) return <div>Loading...</div>;
 //   if (errorTeams || errorMatches) return <div>Error loading data.</div>;
 
   const toggleTeam = (teamId) => {
-    setSelectedTeams((prev) =>
-      prev.includes(teamId)
-        ? prev.filter((id) => id !== teamId)
-        : [...prev, teamId]
-    );
+    startTransition(() => {
+      setSelectedTeams(prev =>
+        prev.includes(teamId)
+          ? prev.filter(id => id !== teamId)
+          : [...prev, teamId]
+      );
+    });
   };
 
-  const filteredMatches = enrichedMatches
-  .filter((match) => {
-    if (selectedTeams.length === 0) return true;
-    return (
-      selectedTeams.includes(match.home.id) ||
-      selectedTeams.includes(match.away.id)
+  const filteredMatches = useMemo(() => {
+    if (!enrichedMatches) return [];
+    if (selectedTeams.length === 0) return enrichedMatches;
+    return enrichedMatches.filter(
+      match =>
+        selectedTeams.includes(match.home.id) ||
+        selectedTeams.includes(match.away.id)
     );
-  });
+  }, [enrichedMatches, selectedTeams]);
+
+  const visibleMatches = filteredMatches.slice(0, visibleCount);
+
+  
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [selectedTeams]);
+
   // render selected team's info card
   const renderTeamCard = () => {
     if (!selectedTeamId) return null;
@@ -206,7 +223,7 @@ export default function HistoryPage() {
               ))}
             </div>
             <div className="recent-grid">
-            {filteredMatches.map((m) => (
+            {visibleMatches.map((m) => (
                 <div className="recent-card" key={m.id}>
                     <p className="recent-date">
                     {m.dateObj.toLocaleDateString(undefined, {
@@ -233,10 +250,10 @@ export default function HistoryPage() {
                 </div>
                 ))}
             </div>
-            {hasMore && (
+            {visibleCount < filteredMatches.length && (
               <button
                 className="show-more-button"
-                onClick={() => setVisibleCount((prev) => prev + 10)}
+                onClick={() => setVisibleCount(prev => prev + 10)}
               >
                 Show More Matches
               </button>
