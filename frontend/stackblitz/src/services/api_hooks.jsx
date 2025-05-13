@@ -142,3 +142,27 @@ export function useDynamicEloQuery(settings, enabled = true) {
     enabled, // allows you to control when the fetch runs
   });
 }
+
+const postEloPrediction = async (settings, teamSelection) => {
+  const payload = {
+    ...settings,        // e.g. k_value, initial_elo, start_season, home_adv
+    ...teamSelection,   // e.g. team1_id, team2_id
+  };
+
+  const res = await fetch(`${API}/elo/dynamic`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch dynamic Elo ratings');
+  return await res.json();
+};
+
+export function useEloPredictionQuery(settings, teamSelection, enabled = true) {
+  return useQuery({
+    queryKey: ['eloPrediction', settings, teamSelection],
+    queryFn: () => postEloPrediction(settings, teamSelection),
+    enabled: enabled && !!settings && !!teamSelection, // only run when both are defined
+  });
+}
