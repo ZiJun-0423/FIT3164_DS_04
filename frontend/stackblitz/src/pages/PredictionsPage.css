@@ -1,7 +1,19 @@
 .predictions-page {
-  background: #121212;
-  color: #fff;
   min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Default colors */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+}
+
+/* Dark mode override */
+[data-theme='dark'] {
+  --bg-color: #1e1e1e;
+  --text-color: #ffffff;
 }
 
 .content {
