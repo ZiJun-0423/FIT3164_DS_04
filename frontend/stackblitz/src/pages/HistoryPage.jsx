@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useTransition, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import Footer from '../components/Footer';
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import './HistoryPage.css';
@@ -264,6 +265,7 @@ export default function HistoryPage() {
             )}
         </section>
         </div>
+        <Footer />
     </div>
   );
 }

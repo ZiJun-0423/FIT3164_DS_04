@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import './PredictionsPage.css';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function PredictionsPage() {
   const [teamA, setTeamA] = useState(null);
@@ -56,6 +58,7 @@ export default function PredictionsPage() {
 
   return (
     <div className="predictions-page">
+       <Navbar />
       <div className="content">
         <h1>Match Predictions</h1>
 
@@ -91,6 +94,7 @@ export default function PredictionsPage() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
