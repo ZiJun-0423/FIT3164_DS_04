@@ -19,7 +19,7 @@ export default function PredictionsPage() {
     { id: 9, name: 'Essendon', logo: '/teamlogo/essendon.png' },
     { id: 10, name: 'Hawthorn Hawks', logo: '/teamlogo/hawthorn.png' },
     { id: 11, name: 'Gold Coast Suns', logo: '/teamlogo/goldcoast.png' },
-    { id: 12, name: 'Greater Western Sydney Giants', logo: '/teamlogo/greatwesternsydney.png' },
+    { id: 12, name: 'Greater Western Sydney Giants', logo: '/teamlogo/greaterwesternsydney.png' },
     { id: 13, name: 'Melbourne', logo: '/teamlogo/melbourne.png' },
     { id: 14, name: 'North Melbourne', logo: '/teamlogo/northmelbourne.png' },
     { id: 15, name: 'Port Adelaide', logo: '/teamlogo/portadelaide.png' },
