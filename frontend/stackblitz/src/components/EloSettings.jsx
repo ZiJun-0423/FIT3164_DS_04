@@ -5,10 +5,21 @@ export default function EloSettings({ eloSettings, onSettingsChange }) {
 
   const handleSliderChange = (e) => {
     const { name, value } = e.target;
-    onSettingsChange({
-      ...eloSettings,
-      [name]: Number(value),
-    });
+    const val = Number(value);
+    let newSettings = { ...eloSettings, [name]: val };
+
+    // Constraint: end_season must be at least 1 greater than start_season
+    if (name === 'start_season') {
+      if (newSettings.end_season <= val) {
+        newSettings.end_season = val + 1;
+      }
+    } else if (name === 'end_season') {
+      if (val <= newSettings.start_season) {
+        newSettings.start_season = val - 1;
+      }
+    }
+
+    onSettingsChange(newSettings);
   };
 
   return (
@@ -72,6 +83,22 @@ export default function EloSettings({ eloSettings, onSettingsChange }) {
               min="1897"
               max="2023"
               value={eloSettings.start_season}
+              onChange={handleSliderChange}
+              className="w-full"
+            />
+          </div>
+
+          {/* End Season Slider */}
+          <div className="slider-group">
+            <label>
+              End Season: {eloSettings.end_season}
+            </label>
+            <input
+              type="range"
+              name="end_season"
+              min="1898"
+              max="2025"
+              value={eloSettings.end_season}
               onChange={handleSliderChange}
               className="w-full"
             />

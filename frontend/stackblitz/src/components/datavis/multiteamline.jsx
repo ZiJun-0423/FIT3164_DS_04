@@ -14,9 +14,14 @@ export default function MultiTeamEloChart({ settings }) {
 
   const enrichedMatchesWithElo = useMemo(() => {
     if (!enrichedMatches || !allEloData) return [];
+    return enrichedMatches
+      .filter(match => {
+        const year = new Date(match.date).getFullYear();
+        return year >= settings.start_season && year <= settings.end_season;
+      })
     
     // Ensure team_id is compared as a number
-    return enrichedMatches.map((match) => {
+    .map((match) => {
       return {
         ...match,
         homeElo: allEloData.find((elo) => Number(elo.match_id) === Number(match.match_id) && Number(elo.team_id) === Number(match.team1_id)),
@@ -27,13 +32,21 @@ export default function MultiTeamEloChart({ settings }) {
 
   const groupedData = useMemo(() => {
     if (!allEloData) return {};
-    return allEloData.reduce((acc, d) => {
-      const team_id = Number(d.team_id);
-      if (!acc[team_id]) acc[team_id] = [];
-      acc[team_id].push(d);
-      return acc;
-    }, {});
-  }, [allEloData]);
+    return allEloData
+      .filter(d => {
+        const year = new Date(d.date).getFullYear();
+        return (
+          year >= settings.start_season &&
+          year <= settings.end_season
+        );
+      })
+      .reduce((acc, d) => {
+        const team_id = Number(d.team_id);
+        if (!acc[team_id]) acc[team_id] = [];
+        acc[team_id].push(d);
+        return acc;
+      }, {});
+  }, [allEloData, settings.start_season, settings.end_season]);
 
   const traces = useMemo(() => {
     return Object.entries(groupedData).map(([team_id, entries]) => {

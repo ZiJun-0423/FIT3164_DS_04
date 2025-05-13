@@ -10,6 +10,7 @@ export default function DataVisPage() {
     k_value: 32,
     initial_elo: 1000,
     start_season: 2005,
+    end_season: 2025,
     home_adv: 100,
   });
 
