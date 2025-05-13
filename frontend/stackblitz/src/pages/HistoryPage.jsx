@@ -137,8 +137,6 @@ export default function HistoryPage() {
       .slice(0, visibleCount);
   }, [filteredMatches, visibleCount]);
 
-  
-
   useEffect(() => {
     setVisibleCount(10);
   }, [selectedTeams]);
