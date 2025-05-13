@@ -12,7 +12,7 @@
 
 /* Dark mode override */
 [data-theme='dark'] {
-  --bg-color: #1e1e1e;
+  --bg-color: #121212;
   --text-color: #ffffff;
 }
 
