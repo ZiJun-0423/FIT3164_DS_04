@@ -88,7 +88,7 @@ with Session() as session:
         team1_home_venue = team_home_venue_map[row['team1']].strip().lower()
         team2_home_venue = team_home_venue_map[row['team2']].strip().lower()
          # Determine the home team based on the venue
-        if row['venue'].strip().lower() == team1_home_venue and row['venue'].strip().lower == team2_home_venue:
+        if row['venue'].strip().lower() == team1_home_venue and row['venue'].strip().lower() == team2_home_venue:
             home_team_id = None  # Both teams have the same home venue, so no clear home team
         elif row['venue'].strip().lower() == team1_home_venue:
             home_team_id = team_name_to_id[row['team1']]  # team1 is the home team
