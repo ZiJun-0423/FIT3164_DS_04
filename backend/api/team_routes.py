@@ -18,7 +18,7 @@ e7
     session = get_db_session()
     try:
         teams = session.query(Team).all()
-        return jsonify([{"name": team.name,"id": team.id, "home venue": team.home_venue} for team in teams]), 200
+        return jsonify([{"name": team.name,"id": team.id, "home_venue": team.home_venue} for team in teams]), 200
     
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
