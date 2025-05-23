@@ -3,17 +3,42 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.team img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 
 .score {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%); 
+  transform: translateX(-50%);
   padding: 0 5px;
   z-index: 1;
+  font-weight: bold;
+  font-size: 1.2rem;
   letter-spacing: 0.1em;
+  color: var(--card-text);
 }
 
+/* Section title */
 h1 {
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -22,15 +47,18 @@ h1 {
   animation: fadeIn 2s ease-in-out;
 }
 
+/* Label spacing */
 .recent-matches-label {
-  display: block;        
-  margin-bottom: 1.5rem;   
+  display: block;
+  margin-bottom: 1.5rem;
 }
 
+/* Match date styling */
 .recent-date {
-    text-align: center;
+  text-align: center;
 }
 
+/* Show More Button */
 .show-more-button {
   margin: 2rem auto;
   display: block;
@@ -45,18 +73,25 @@ h1 {
 }
 
 .show-more-button:hover {
-  background-color: #00a58a;
+  background-color: #00977a;
 }
 
+/* Team icon row (top filter strip) */
 .team-icon-row {
   display: flex;
+  justify-content: center;         /* Center items horizontally */
+  align-items: center;
+  flex-wrap: nowrap;
   overflow-x: auto;
   gap: 1rem;
   padding: 1rem 0;
   border-bottom: 1px solid #ccc;
   margin-bottom: 2rem;
+  scroll-padding: 1rem;
 }
 
+
+/* Team icon thumbnail in filter row */
 .team-icon {
   width: 45px;
   height: 45px;

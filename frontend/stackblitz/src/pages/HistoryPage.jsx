@@ -10,7 +10,6 @@ import { fetchAllTeams, fetchAllMatches } from "../services/api"; // adjust path
 const makeLogo = name =>
   `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
 
-
 export default function HistoryPage() {
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [showElo, setShowElo]               = useState(true);

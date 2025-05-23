@@ -1,34 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './PredictionsPage.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function PredictionsPage() {
+  const [teams, setTeams] = useState([]);
   const [teamA, setTeamA] = useState(null);
   const [teamB, setTeamB] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTeamSlot, setSelectedTeamSlot] = useState('');
+  const [predictionResult, setPredictionResult] = useState('');
 
-  const teams = [
-    { id: 1, name: 'Collingwood', logo: '/teamlogo/collingwood.png' },
-    { id: 2, name: 'Richmond', logo: '/teamlogo/richmond.png' },
-    { id: 3, name: 'Geelong', logo: '/teamlogo/geelong.png' },
-    { id: 4, name: 'Brisbane Lions', logo: '/teamlogo/brisbanelions.png' },
-    { id: 5, name: 'Adelaide', logo: '/teamlogo/adelaide.png' },
-    { id: 6, name: 'West Coast Eagles', logo: '/teamlogo/westcoast.png' },
-    { id: 7, name: 'Carlton', logo: '/teamlogo/carlton.png' },
-    { id: 8, name: 'Fremantle', logo: '/teamlogo/fremantle.png' },
-    { id: 9, name: 'Essendon', logo: '/teamlogo/essendon.png' },
-    { id: 10, name: 'Hawthorn Hawks', logo: '/teamlogo/hawthorn.png' },
-    { id: 11, name: 'Gold Coast Suns', logo: '/teamlogo/goldcoast.png' },
-    { id: 12, name: 'Greater Western Sydney Giants', logo: '/teamlogo/greaterwesternsydney.png' },
-    { id: 13, name: 'Melbourne', logo: '/teamlogo/melbourne.png' },
-    { id: 14, name: 'North Melbourne', logo: '/teamlogo/northmelbourne.png' },
-    { id: 15, name: 'Port Adelaide', logo: '/teamlogo/portadelaide.png' },
-    { id: 16, name: 'St Kilda', logo: '/teamlogo/stkilda.png' },
-    { id: 17, name: 'Sydney Swans', logo: '/teamlogo/sydney.png' },
-    { id: 18, name: 'Western Bulldogs', logo: '/teamlogo/westernbulldogs.png' }
-    ];
+  // Load teams from CSV
+  useEffect(() => {
+    fetch('/data/teams.csv')
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.trim().split('\n').slice(1);
+        const parsed = rows.map(row => {
+          const [id, name, logo] = row.split(',').map(s => s.trim());
+          return { id: +id, name, logo };
+        });
+        setTeams(parsed);
+      })
+      .catch(error => console.error("Failed to load teams.csv:", error));
+  }, []);
 
   const openModal = (teamSlot) => {
     setSelectedTeamSlot(teamSlot);
@@ -49,59 +45,83 @@ export default function PredictionsPage() {
   };
 
   const predict = () => {
-  if (teamA && teamB && teamA !== teamB) {
-    const probA = Math.floor(Math.random() * 50) + 25; 
-    const probB = 100 - probA;
+    if (teamA && teamB && teamA !== teamB) {
+      const probA = Math.floor(Math.random() * 50) + 25;
+      const probB = 100 - probA;
 
-    if (probA > probB) {
-      const scoreA = Math.floor(Math.random() * 121) + 40; 
-      const scoreB = Math.floor(Math.random() * (scoreA - 40)) + 40; 
+      let scoreA, scoreB;
 
-      alert(`${teamA.name} has ${probA}% chance to win, ${teamB.name} has ${probB}% chance.\nFinal score: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
-    } else {
-      const scoreB = Math.floor(Math.random() * 121) + 40;  
-      const scoreA = Math.floor(Math.random() * (scoreB - 40)) + 40;  
+      if (probA > probB) {
+        scoreA = Math.floor(Math.random() * 121) + 40;
+        scoreB = Math.floor(Math.random() * (scoreA - 40)) + 40;
+      } else {
+        scoreB = Math.floor(Math.random() * 121) + 40;
+        scoreA = Math.floor(Math.random() * (scoreB - 40)) + 40;
+      }
 
-      alert(`${teamA.name} has ${probA}% chance to win, ${teamB.name} has ${probB}% chance.\nFinal score: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
+      const resultText = `Final score: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`;
+      setPredictionResult(resultText);
     }
-  }
-};
+  };
 
   return (
     <div className="predictions-page">
-       <Navbar />
+      <Navbar />
       <div className="content">
         <h1>Match Predictions</h1>
 
         <div className="button-container">
           <button className="select-team-button" onClick={() => openModal('teamA')}>
-            {teamA ? <img src={teamA.logo} alt={teamA.name} className="team-logo" /> : 'Select Team A'}
+            {teamA ? (
+              <div className="team-button-content">
+                <img src={teamA.logo} alt={teamA.name} className="team-logo-large" />
+                <div className="team-button-name">{teamA.name}</div>
+              </div>
+            ) : 'Select Team A'}
           </button>
+
           <button className="select-team-button" onClick={() => openModal('teamB')}>
-            {teamB ? <img src={teamB.logo} alt={teamB.name} className="team-logo" /> : 'Select Team B'}
+            {teamB ? (
+              <div className="team-button-content">
+                <img src={teamB.logo} alt={teamB.name} className="team-logo-large" />
+                <div className="team-button-name">{teamB.name}</div>
+              </div>
+            ) : 'Select Team B'}
           </button>
         </div>
 
         <button className="predict-button" onClick={predict}>
-          Predict Match
+          Predict Match Outcome
         </button>
 
+        {predictionResult && (
+          <div className="prediction-result">
+            {predictionResult.split('\n').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
+          </div>
+        )}
+
         {isModalOpen && (
-          <div className="modal">
-            <div className="modal-content">
-              <h2>Select a Team</h2>
-              <ul className="team-list">
-                {teams.map((team) => (
-                  <li key={team.id} onClick={() => handleTeamSelect(team)}>
-                    <img src={team.logo} alt={team.name} className="team-logo" />
-                    {team.name}
-                  </li>
+          <div className="bottom-drawer">
+            <h2 className="text-xl font-bold mb-3">Select a Team</h2>
+            <div className="team-selector-list">
+              {teams
+                .filter(team =>
+                  selectedTeamSlot === 'teamA' ? team.id !== teamB?.id : team.id !== teamA?.id
+                )
+                .map(team => (
+                  <button
+                    key={team.id}
+                    onClick={() => handleTeamSelect(team)}
+                    className="team-card"
+                  >
+                    <img src={team.logo} alt={team.name} className="team-card-logo" />
+                    <span className="team-card-name">{team.name}</span>
+                  </button>
                 ))}
-              </ul>
-              <div className="modal-footer">
-                <button className="close-button" onClick={closeModal}>Close</button>
-              </div>
             </div>
+            <button className="close-button" onClick={closeModal}>Close</button>
           </div>
         )}
       </div>
