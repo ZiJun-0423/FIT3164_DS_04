@@ -8,7 +8,7 @@ import {API} from '../config.js'
 import { useQuery } from '@tanstack/react-query';
 import { fetchAllMatches, fetchAllTeams, fetchTeamRankings } from '../services/api.js';
 
-// helper: normalize team name → logo filename
+// helper: normalize team name -> logo filename
 const makeLogo = name =>
   `/teamlogo/${name.toLowerCase().replace(/\s+/g, '')}.png`;
 
@@ -32,10 +32,19 @@ export default function HomePage() {
   const latestMatchDate = useMemo(() => {
     return allMatches?.length
       ? new Date(Math.max(...allMatches.map(m => new Date(m.date))))
-      : new Date(); // fallback
+      : null;
   }, [allMatches]);
 
   const [selectedDate, setSelectedDate] = useState(latestMatchDate);
+  
+  // Sync when latestMatchDate is available
+  useEffect(() => {
+    if (latestMatchDate) {
+      setSelectedDate(latestMatchDate);
+    }
+  }, [latestMatchDate]);
+  console.log('selectedDate', selectedDate);
+  console.log('latestMatchDate', latestMatchDate);
 
   const {
     data: Rankings,
@@ -169,7 +178,7 @@ export default function HomePage() {
         />
       )}
       {/* Standings Table */}
-      <section className="table-section">
+      <section className="table-section" data-testid="team-standings-table">
         <h2>Team Standings</h2>
         <div className="table-wrapper">
           <table className="table-container">
@@ -205,12 +214,17 @@ export default function HomePage() {
                     <tr key={ranking.team_id}>
                       <td>{i + 1}</td>
                       <td>
-                        <img 
-                          src={ranking.team.logo} 
-                          alt={ranking.team.name}
-                          style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
-                        />
-                        {ranking.team.name}
+                        <Link 
+                            to={`/team/${ranking.team_id}`} 
+                            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+                        >
+                            <img 
+                            src={ranking.team.logo} 
+                            alt={ranking.team.name}
+                            style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '8px' }}
+                            />
+                            {ranking.team.name}
+                        </Link>
                       </td>
                       <td>{ranking.played}</td>
                       <td>{ranking.points}</td>

@@ -26,7 +26,7 @@ export default function MiniDateSelector({ onDateChange, defaultDate, maxValidDa
         onChange={handleDateChange}
         dateFormat="dd/MM/yyyy"
         placeholderText="DD/MM/YYYY"
-        openToDate={selectedDate || defaultDate || new Date()}
+        openToDate={selectedDate || defaultDate || new Date()} // <- important
         maxDate={maxValidDate}
         filterDate={(date) => (!maxValidDate || date <= maxValidDate)}
         isClearable
