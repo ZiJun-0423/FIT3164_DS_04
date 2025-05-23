@@ -40,5 +40,7 @@ def predict_match(team1, team2,features_df, model):
 
 # Example usage for local test
 if __name__ == "__main__":
-    result = predict_match("Fitzroy", "Carlton", features_df, model )
-    print(result)
+    #result = predict_match("Fitzroy", "Carlton", features_df, model )
+    #print(result)
+    result = predict_match(team1, team2, features_df, model)
+    

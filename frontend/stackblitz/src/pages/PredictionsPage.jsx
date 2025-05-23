@@ -49,12 +49,23 @@ export default function PredictionsPage() {
   };
 
   const predict = () => {
-    if (teamA && teamB && teamA !== teamB) {
-      const probA = Math.floor(Math.random() * 50) + 25;
-      const probB = 100 - probA;
-      alert(`${teamA.name} has ${probA}% chance to win, ${teamB.name} has ${probB}% chance.`);
+  if (teamA && teamB && teamA !== teamB) {
+    const probA = Math.floor(Math.random() * 50) + 25; 
+    const probB = 100 - probA;
+
+    if (probA > probB) {
+      const scoreA = Math.floor(Math.random() * 121) + 40; 
+      const scoreB = Math.floor(Math.random() * (scoreA - 40)) + 40; 
+
+      alert(`${teamA.name} has ${probA}% chance to win, ${teamB.name} has ${probB}% chance.\nFinal score: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
+    } else {
+      const scoreB = Math.floor(Math.random() * 121) + 40;  
+      const scoreA = Math.floor(Math.random() * (scoreB - 40)) + 40;  
+
+      alert(`${teamA.name} has ${probA}% chance to win, ${teamB.name} has ${probB}% chance.\nFinal score: ${teamA.name} ${scoreA} - ${teamB.name} ${scoreB}`);
     }
-  };
+  }
+};
 
   return (
     <div className="predictions-page">
