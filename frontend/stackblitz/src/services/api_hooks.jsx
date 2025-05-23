@@ -87,10 +87,9 @@ export function useTeamById(id) {
   return useQuery({
     queryKey: ['team', id],
     queryFn: async () => {
-      const res = await fetch(`${API}/teams/`);
-      if (!res.ok) throw new Error('Failed to fetch teams');
-      const teams = await res.json();
-      return teams.find(t => t.id === +id);
+      const res = await fetch(`${API}/teams/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch team');
+      return res.json();
     },
     enabled: !!id, // prevents query if id is undefined
   });
@@ -100,7 +99,7 @@ export function useTeamEloRatings(id) {
   return useQuery({
     queryKey: ['eloRatings', id],
     queryFn: async () => {
-      const res = await fetch(`${API}/elo_ratings/`);
+      const res = await fetch(`${API}/elo/filter_by_team_id/${id}`);
       if (!res.ok) throw new Error('Failed to fetch elo ratings');
       const allElo = await res.json();
       return allElo
@@ -164,5 +163,25 @@ export function useEloPredictionQuery(settings, teamSelection, enabled = true) {
     queryKey: ['eloPrediction', settings, teamSelection],
     queryFn: () => postEloPrediction(settings, teamSelection),
     enabled: enabled && !!settings && !!teamSelection, // only run when both are defined
+  });
+}
+
+async function fetchTeamRankings(date){
+    try {
+        const res = await fetch(`${API}/teams/rankings/date/${date}`);
+        if (!res.ok) throw new Error('failed to fetch team rankings by date');
+        return await res.json();
+    } catch (error) {
+        console.error('API Error:', error);
+        return []
+    }
+}
+
+export function useTeamRankings(selectedDate) {
+  return useQuery({
+    queryKey: ['rankings', selectedDate],
+    queryFn: () =>
+      fetchTeamRankings(selectedDate.toLocaleDateString('en-CA')),
+    enabled: !!selectedDate,
   });
 }

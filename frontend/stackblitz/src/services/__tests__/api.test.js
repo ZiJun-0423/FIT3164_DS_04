@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useTeamsWithLogos, useEnrichedMatches } from '../api_hooks.jsx';
+import { describe, test, expect, beforeAll } from '@jest/globals';
+import { useTeamsWithLogos, useEnrichedMatches, useTeamById, useTeamEloRatings } from '../api_hooks.jsx';
 import { createWrapper } from '../test-utils.js';
 
 import fetch from 'node-fetch';
-import test from 'node:test';
 
 beforeAll(() => {
   global.fetch = fetch;
@@ -36,51 +37,73 @@ describe('useTeamsWithLogos (real fetch)', () => {
 });
 
 
-// describe('useEnrichedMatches (integration)', () => {
-//   test('fetches enriched matches with home/away teams and logos', async () => {
-//     const { result } = renderHook(() => useEnrichedMatches(), {
-//       wrapper: createWrapper(), 
-//     });
+describe('useEnrichedMatches (integration)', () => {
+  test('fetches enriched matches with home/away teams and logos', async () => {
+    const { result } = renderHook(() => useEnrichedMatches(), {
+      wrapper: createWrapper(), 
+    });
 
-//     // Wait for data to finish loading
-//     await waitFor(() => !result.current.isLoading);
+    // Wait for data to finish loading
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.enrichedMatches.length).toBeGreaterThan(0);
+    }, { timeout: 10000 }); // Increase to 5s
 
-//     // Validate shape
-//     expect(Array.isArray(result.current.enrichedMatches)).toBe(true);
-//     expect(result.current.enrichedMatches.length).toBeGreaterThan(0);
+    // Validate shape
+    expect(Array.isArray(result.current.enrichedMatches)).toBe(true);
+    expect(result.current.enrichedMatches.length).toBeGreaterThan(0);
 
-//     for (const match of result.current.enrichedMatches) {
-//       expect(match).toHaveProperty('dateObj');
-//       expect(match.home).toBeDefined();
-//       expect(match.away).toBeDefined();
-//       expect(match.home).toHaveProperty('id');
-//       expect(match.away).toHaveProperty('id');
-//       expect(match.home.logo).toMatch(/\/teamlogo\/.+\.png$/);
-//       expect(match.away.logo).toMatch(/\/teamlogo\/.+\.png$/);
-//     }
-//   });
-// });
+    for (const match of result.current.enrichedMatches) {
+      expect(match).toHaveProperty('dateObj');
+      expect(match.home).toBeDefined();
+      expect(match.away).toBeDefined();
+      expect(match.home).toHaveProperty('id');
+      expect(match.away).toHaveProperty('id');
+      expect(match.home.logo).toMatch(/\/teamlogo\/.+\.png$/);
+      expect(match.away.logo).toMatch(/\/teamlogo\/.+\.png$/);
+    }
+  });
+});
 
-// describe('useDynamicEloQuery', () => {
-//   beforeEach(() => {
-//     fetch.mockClear();
-//   });
+describe('useTeamById (integration)', () => {
+  test('fetches team by id', async () => {
+    const { result } = renderHook(() => useTeamById(1), {
+      wrapper: createWrapper(),
+    });
 
-//   it('posts settings and returns dynamic ELO data', async () => {
-//     const fakeResponse = [{ team_id: 1, rating: 1500 }];
-//     const settings = { k_value: 20, initial_elo: 1000 };
+    // Wait for data to finish loading
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data).toBeDefined();
+    }, { timeout: 10000 }); // Increase to 5s
 
-//     fetch.mockResolvedValueOnce({
-//       ok: true,
-//       json: async () => fakeResponse,
-//     });
+    // Validate shape
+    expect(result.current.data).toHaveProperty('home venue');
+    expect(result.current.data).toHaveProperty('id');
+    expect(result.current.data).toHaveProperty('name');
+  });
+});
 
-//     const { result } = renderHook(
-//       () => useDynamicEloQuery(settings),
-//       { wrapper: createWrapper() }
-//     );
+describe('useTeamEloRatings (integration)', () => {
+  test('fetches team elo ratings', async () => {
+    const { result } = renderHook(() => useTeamEloRatings(1), {
+      wrapper: createWrapper(),
+    });
 
-//     await waitFor(() => expect(result.current.data).toEqual(fakeResponse));
-//     expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/elo/dynamic'), expect.anything());
-//   });
-// });
+    // Wait for data to finish loading
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.data.length).toBeGreaterThan(0);
+    }, { timeout: 10000 }); // Increase to 5s
+
+    // Validate shape
+    expect(Array.isArray(result.current.data)).toBe(true);
+    expect(result.current.data.length).toBeGreaterThan(0);
+
+    for (const rating of result.current.data) {
+      expect(rating).toHaveProperty('team_id');
+      expect(rating).toHaveProperty('date');
+      expect(rating).toHaveProperty('rating_after');
+    }
+  });
+});
