@@ -43,14 +43,14 @@ export default function HomePage() {
       setSelectedDate(latestMatchDate);
     }
   }, [latestMatchDate]);
-  console.log('selectedDate', selectedDate);
-  console.log('latestMatchDate', latestMatchDate);
+//   console.log('selectedDate', selectedDate);
+//   console.log('latestMatchDate', latestMatchDate);
 
   const {
     data: Rankings,
     isLoading: loadingRankings,
     isError: errorRankings,
-  } = useQuery({queryKey: ['rankings'], queryFn: () => fetchTeamRankings(selectedDate.toISOString().split('T')[0]), enabled:!! selectedDate});
+  } = useQuery({queryKey: ['rankings'], queryFn: () => fetchTeamRankings(selectedDate.toLocaleDateString('en-CA')), enabled:!! selectedDate});
 
   const teamsWithLogos = useMemo(() => {
     if (!teams) return [];
