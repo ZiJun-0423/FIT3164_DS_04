@@ -29,7 +29,7 @@ Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
 
 #load data from csv
-merged_df = pd.read_csv("database/data/merged_data.csv")
+merged_df = pd.read_csv("data/merged_data.csv")
 
 #finding unique team names
 unique_teams = pd.unique(merged_df[['team1', 'team2']].values.ravel())
